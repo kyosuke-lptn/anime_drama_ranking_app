@@ -3,3 +3,4 @@ PyMySQL==0.9.3
 Pillow
 mysqlclient
 django-environ
+django-hamlpy
