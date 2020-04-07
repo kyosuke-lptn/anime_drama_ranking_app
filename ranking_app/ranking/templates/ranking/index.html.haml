@@ -1,0 +1,10 @@
+!!! 5
+%html{ lang: 'ja' }
+    %head
+    %meta{ charset: 'utf-8' }
+    %title title
+    - load static
+    %link{ rel: 'stylesheet', type: 'text/css', href: "{% static 'ranking/style.css' %}" }
+  %body
+    %h1 hagehage
+    %img{ src: "{% static 'ranking/images/ninja-sample.png' %}" }

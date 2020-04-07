@@ -6,11 +6,14 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     ports:
       - "3306:3306"
+    volumes:
+      - est-data:/var/lib/mysql
     networks:
       - app-net
 
   django:
     build: ./django
+    command: python3 manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
     volumes:
