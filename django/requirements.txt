@@ -1,6 +1,8 @@
-django==2.1.5
+Django==2.1.5
+django-environ==0.4.5
+django-hamlpy==1.2
+mysqlclient==1.4.6
+Pillow==7.1.1
 PyMySQL==0.9.3
-Pillow
-mysqlclient
-django-environ
-django-hamlpy
+pytz==2019.3
+regex==2020.4.4
