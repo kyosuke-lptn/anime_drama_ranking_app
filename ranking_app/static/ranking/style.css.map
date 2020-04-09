@@ -1,0 +1,10 @@
+{
+	"version": 3,
+	"file": "style.css",
+	"sources": [
+		"style.scss",
+		"toppage.scss"
+	],
+	"names": [],
+	"mappings": "ACAA,AAAA,KAAK,CAAC;EACJ,UAAU,EAAE,KAAK,CAAC,8BAA8B,CAAC,SAAS,GAC3D;;AAED,AAAA,GAAG,CAAC;EACF,KAAK,EAAE,GAAG,GACX"
+}
