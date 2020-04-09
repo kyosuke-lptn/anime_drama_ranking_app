@@ -1,5 +1,9 @@
 .DS_Store
 
+# css compile file
+ranking_app/static/ranking/*
+
+
 # 環境変数
 .env
 
