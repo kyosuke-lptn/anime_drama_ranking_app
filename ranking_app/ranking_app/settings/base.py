@@ -108,3 +108,4 @@ SASS_PROCESSOR_INCLUDE_DIRS = (
 SASS_PROCESSOR_ROOT = os.path.join(BASE_DIR, 'static')
 SASS_PROCESSOR_INCLUDE_FILE_PATTERN = r'^.+\.(sass|scss)$'
 SASS_TEMPLATE_EXTS = ['.html', '.haml']
+
