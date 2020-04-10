@@ -29,6 +29,18 @@ TEMPLATES = [
     },
 ]
 
+DATABASES = {
+    'default': {
+        'ENGINE': env('DB_ENGINE'),
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': env('DB_HOST'),
+        'PORT': env('DB_PORT'),
+        'ATOMIC_REQUESTS': True,
+    }
+}
+
 # TODO (sumitani) 本番環境でのLOG設定を追加する
 
 # TODO (sumitani) staticファイルを配信する時に本番環境では、プロキシサーバなどに配置するように設定する

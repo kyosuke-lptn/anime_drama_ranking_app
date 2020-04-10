@@ -27,6 +27,23 @@ TEMPLATES = [
     },
 ]
 
+# DATABASE
+
+DATABASES = {
+    'default': {
+        'ENGINE': env('DB_ENGINE'),
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': env('DB_HOST'),
+        'PORT': env('DB_PORT'),
+        'ATOMIC_REQUESTS': True,
+        'TEST': {
+            'NAME': 'test_database'
+        },
+    }
+}
+
 
 # Log
 DJANGO_LOG_LEVEL = DEBUG
@@ -46,3 +63,5 @@ LOGGING = {
         },
     },
 }
+
+# TODO (sumitani) django-debug-toolbarの設定をする

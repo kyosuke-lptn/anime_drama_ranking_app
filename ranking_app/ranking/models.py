@@ -13,6 +13,7 @@ class Content(models.Model):
                                                blank=True)
     aggregation_start_date = models.DateTimeField('集計開始日', null=True,
                                                   blank=True)
+    update_date = models.DateTimeField('更新日', auto_now=True)
 
     def __str__(self):
         return self.content_name
@@ -28,7 +29,8 @@ class Category(models.Model):
 
 class TwitterData(models.Model):
     tweets_count = models.PositiveIntegerField('ツイート数', default=0)
-    aggregation_period = models.DateTimeField('集計期間')
+    aggregation_period = models.DurationField('集計期間')
     content = models.ForeignKey(Content, on_delete=models.CASCADE,
                                 verbose_name='作品名')
-
+    create_date = models.DateTimeField('作成日', auto_now_add=True)
+    update_date = models.DateTimeField('更新日', auto_now=True)
