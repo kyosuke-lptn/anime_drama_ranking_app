@@ -1,0 +1,10 @@
+!!! 5
+%html{ lang: 'ja' }
+  %head
+    %meta{ charset: 'utf-8' }
+    %title ハゲハゲ
+    - load sass_tags
+    %link{ rel: 'stylesheet', type: 'text/css', href: "{% sass_src 'ranking/style.scss' %}" }
+  %body
+    .container
+      - block main
