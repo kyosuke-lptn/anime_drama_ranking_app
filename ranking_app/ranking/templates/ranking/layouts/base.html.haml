@@ -6,5 +6,7 @@
     - load sass_tags
     %link{ rel: 'stylesheet', type: 'text/css', href: "{% sass_src 'ranking/style.scss' %}" }
   %body
+    - include 'ranking/layouts/_header.html.haml'
+
     .container
       - block main
