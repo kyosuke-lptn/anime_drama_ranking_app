@@ -2,31 +2,43 @@
   display: flex;
   justify-content: space-between;
   max-width: 100%;
-  height: 60px;
+  height: 80px;
   width: 100%;
   align-items: center;
   position: absolute;
   top: 0;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: bold;
+  background-color: #f6f6f6;
+  box-shadow: 0 8px 3px -3px #808080;
   &__title {
-    width: 400px;
+    width: 10%;
     margin: 0;
     float: left;
     img {
-      height: 40px;
+      float: left;
+      height: 60px;
       width: auto;
-      margin-top: 20px;
-      margin-left: 20px;
+      margin-top: 15px;
+      margin-left: 50px;
+      padding-right: 30px;
     }
   }
   &__nav {
+    width: 100%;
     display: flex;
-    float: right;
     margin-top: 20px;
-    margin-right: 20px;
-    li {
-      padding: 0 20px;
-      font-size: 12px;
-      display: inline-block;
+    position: relative;
+    ul{
+      position: relative;
+      left: 50%;
+      li {
+        position: relative;
+        padding: 0 25px;
+        font-size: 25px;
+        display: inline-block;
+        left: -50%;
+      }
     }
   }
 }
