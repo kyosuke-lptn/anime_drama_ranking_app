@@ -1,12 +1,13 @@
 .container {
   padding-top: 95px;
-  width: 80%;
+  width: 100%;
   margin: auto;
   &__image {
-    width: 80%;
+    width: 100%;
     text-align: center;
+    display: inline-block;
     img {
-      width: 80%;
+      text-align: center;
     }
   }
   &__info {
@@ -18,6 +19,7 @@
       font-size: 25px;
       font-family: 'Montserrat', sans-serif;
       font-weight: bold;
+      padding-left: 100px;
       margin-bottom: 20px;
       img {
         height: 200px;
