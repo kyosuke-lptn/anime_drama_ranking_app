@@ -1,6 +1,7 @@
 import json
 
 from django.db import models
+from django.db import transaction
 import environ
 from requests_oauthlib import OAuth1Session
 
@@ -21,7 +22,7 @@ class Content(models.Model):
 
 class Category(models.Model):
     category_name = models.CharField('カテゴリー名', max_length=20, unique=True)
-    content = models.ManyToManyField(Content, verbose_name='作品名')
+    contents = models.ManyToManyField(Content, verbose_name='作品名')
 
     def __str__(self):
         return self.category_name
@@ -60,10 +61,12 @@ class TwitterRegularlyData(models.Model):
     create_date = models.DateTimeField('データ取得日', auto_now_add=True)
 
     def retweets_avg(self):
-        return self.retweet_count / self.statuses_count
+        result = self.retweet_count / self.statuses_count
+        return round(result, 2)
 
     def favorite_avg(self):
-        return self.favorite_count / self.statuses_count
+        result = self.favorite_count / self.statuses_count
+        return round(result, 2)
 
 
 TIMELINE_COUNT = '200'
@@ -123,5 +126,10 @@ class TwitterApi(object):
             "screen_name": user_name
         }
         return self.get_base(user_url, query)
+
+    @transaction.atomic
+    def insert_twitter_data_to_ranking_class(self, content):
+        TwitterData.objects.create()
+
 
 
