@@ -8,3 +8,7 @@ from django.template import loader
 def index(request):
     template = loader.get_template('ranking/index.html.haml')
     return HttpResponse(template.render())
+
+def show(request):
+    template = loader.get_template('ranking/show.html.haml')
+    return HttpResponse(template.render())
