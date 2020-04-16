@@ -1,10 +1,89 @@
-!!! 5
-%html{ lang: 'ja' }
-  %head
-    %meta{ charset: 'utf-8' }
-    %title ハゲハゲ
-    - load sass_tags
-    %link{ rel: 'stylesheet', type: 'text/css', href: "{% sass_src 'ranking/style.scss' %}" }
-  %body
-    %h1 hagehage
-    %img{ src: "{% sass_src 'ranking/images/ninja-sample.png' %}" }
+- extends "ranking/layouts/base.html.haml"
+
+- block main
+  .container__image
+    %p Twitterの情報から、ランキング形式で注目の作品を紹介します。
+    %img(src = "/static/ranking/images/top-sample1.jpg")
+  .container__info
+    %section
+      %p.container__info__mov Movies
+      %br
+        .container__info__box 1位
+          %br
+          %img(src = "static/ranking/images/mov-sample1.jpg")
+          %br
+          %a hagehageの覚醒 all night party
+        .container__info__box 2位
+          %br
+          %img(src = "static/ranking/images/mov-sample2.jpg")
+          %br
+          %a タイトル
+        .container__info__box 3位
+          %br
+          %img(src = "static/ranking/images/mov-sample3.jpg")
+          %br
+          %a タイトル
+        .container__info__box 4位
+          %br
+          %img(src = "static/ranking/images/mov-sample4.jpg")
+          %br
+          %a タイトル
+        .container__info__box 5位
+          %br
+          %img(src = "static/ranking/images/mov-sample5.jpg")
+          %br
+          %a タイトル
+    %section
+      %p.container__info__ani Animations
+      %br
+        .container__info__box 1位
+          %br
+          %img(src = "static/ranking/images/ani-sample1.jpg")
+          %br
+          %a タイトル
+        .container__info__box 2位
+          %br
+          %img(src = "static/ranking/images/ani-sample2.jpg")
+          %br
+          %a タイトル
+        .container__info__box 3位
+          %br
+          %img(src = "static/ranking/images/ani-sample3.jpg")
+          %br
+          %a タイトル
+    %section
+      %p.container__info__dra Dramas
+      %br
+        .container__info__box 1位
+          %br
+          %img(src = "static/ranking/images/dra-sample1.jpg")
+          %br
+          %a hagehageと愉快仲間たち in the sea
+        .container__info__box 2位
+          %br
+          %img(src = "static/ranking/images/dra-sample2.jpg")
+          %br
+          %a タイトル
+        .container__info__box 3位
+          %br
+          %img(src = "static/ranking/images/dra-sample3.jpg")
+          %br
+          %a タイトル
+    %section
+      %p.container__info__car Cartoons
+      %br
+        .container__info__box 1位
+          %br
+          %img(src = "static/ranking/images/car-sample1.jpg")
+          %br
+          %a タイトル
+        .container__info__box 2位
+          %br
+          %img(src = "static/ranking/images/car-sample2.jpg")
+          %br
+          %a タイトル
+        .container__info__box 3位
+          %br
+          %img(src = "static/ranking/images/car-sample3.jpg")
+          %br
+          %a タイトル
