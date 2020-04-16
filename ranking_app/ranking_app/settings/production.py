@@ -39,6 +39,7 @@ DATABASES = {
         'PORT': env('DB_PORT'),
         'OPTIONS': {
             'charset': 'utf8mb4',
+            'sql_mode': 'TRADITIONAL,NO_AUTO_VALUE_ON_ZERO,ONLY_FULL_GROUP_BY,'
         },
         'ATOMIC_REQUESTS': True,
     }

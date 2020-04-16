@@ -2,7 +2,7 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-import pymysql
+
 
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ranking_app.settings')
@@ -20,4 +20,3 @@ def main():
 if __name__ == '__main__':
     main()
 
-pymysql.install_as_MySQLdb()
