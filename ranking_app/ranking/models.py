@@ -11,7 +11,7 @@ from requests_oauthlib import OAuth1Session
 class Content(models.Model):
     content_name = models.CharField('作品名', max_length=50, unique=True,
                                     db_index=True)
-    description = models.CharField('詳細説明', max_length=500)
+    description = models.TextField('詳細説明')
     release_date = models.DateTimeField('リリース日', db_index=True)
     maker = models.CharField('作り手', max_length=50, db_index=True)
     update_date = models.DateTimeField('更新日', auto_now=True)
@@ -31,7 +31,7 @@ class Category(models.Model):
 class TwitterData(models.Model):
     tw_screen_name = models.CharField('スクリーンネーム', max_length=255,
                                       unique=True)
-    tw_description = models.CharField('twitterからの詳細情報', max_length=500)
+    tw_description = models.TextField('twitterからの詳細情報')
     content_url = models.CharField('公式URL', max_length=500, null=True,
                                    blank=True)
     profile_image_url_https = models.CharField('アイコン画像のURL',
@@ -128,8 +128,32 @@ class TwitterApi(object):
         return self.get_base(user_url, query)
 
     @transaction.atomic
-    def insert_twitter_data_to_ranking_class(self, content):
-        TwitterData.objects.create()
+    def insert_twitter_data_to_ranking_class(self, content, user_data,
+                                             timeline_data):
+        # TODO (sumitani) 例外処理が必要か考える。
+        tw_data_args = {
+            'tw_screen_name': user_data['screen_name'],
+            'tw_description': user_data['description'],
+            'content_url': user_data['url'],
+            'profile_image_url_https': user_data['profile_image_url_https'],
+            'profile_banner_url': user_data['profile_banner_url'],
+            'content': content
+        }
+        tw_data = TwitterData.objects.create(**tw_data_args)
+        retweet_count = 0
+        favorite_count = 0
+        for tweet in timeline_data:
+            retweet_count += tweet['retweet_count']
+            favorite_count += tweet['favorite_count']
+        twr_data_args = {
+            'retweet_count': retweet_count,
+            'favorite_count': favorite_count,
+            'statuses_count': user_data['statuses_count'],
+            'listed_count': user_data['listed_count'],
+            'followers_count': user_data['followers_count'],
+            'tw_data': tw_data
+        }
+        TwitterRegularlyData.objects.create(**twr_data_args)
 
 
 
