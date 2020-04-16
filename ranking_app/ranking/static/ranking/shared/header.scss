@@ -11,6 +11,7 @@
   font-weight: bold;
   background-color: #FFFFF0	;
   box-shadow: 0 4px 3px -3px #808080;
+  z-index: 20;
   &__title {
     width: 10%;
     margin: 0;
@@ -20,7 +21,7 @@
       height: 60px;
       width: auto;
       margin-top: 15px;
-      margin-left: 50px;
+      margin-left: 100px;
       padding-right: 30px;
     }
   }
