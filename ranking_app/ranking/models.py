@@ -16,6 +16,9 @@ class Content(models.Model):
                                     blank=True)
     maker = models.CharField('作り手', max_length=50, db_index=True)
     update_date = models.DateTimeField('更新日', auto_now=True)
+    # TODO 以下のfieldを追加する。
+    # screen_name = models.CharField('twitter ID', max_length=50, unique=True,
+    #                                db_index=True)
 
     def __str__(self):
         return self.content_name
@@ -140,39 +143,35 @@ class TwitterApi(object):
                 break
         return timeline
 
-    def get_user(self, user_name):
+    def get_user(self, screen_name):
         user_url = "https://api.twitter.com/1.1/users/show.json"
         query = {
-            "screen_name": user_name
+            "screen_name": screen_name
         }
         return self.get_base(user_url, query)
 
     @transaction.atomic
     def insert_twitter_data_to_ranking_class(self, content, user_data,
                                              timeline_data):
-        # TODO (sumitani) 例外処理が必要か考える。
-        tw_data_args = {
-            'tw_screen_name': user_data['screen_name'],
-            'tw_description': user_data['description'],
-            'content_url': user_data['url'],
-            'profile_image_url_https': user_data['profile_image_url_https'],
-            'profile_banner_url': user_data['profile_banner_url'],
-            'content': content
-        }
+        tw_data_args = {'content': content}
+        twitter_data_fields = [
+            'tw_screen_name', 'tw_description', 'content_url',
+            'profile_image_url_https', 'profile_banner_url']
+        for tw_attr in twitter_data_fields:
+            if tw_attr in user_data:
+                tw_data_args[tw_attr] = user_data[tw_attr]
         tw_data = TwitterData.objects.create(**tw_data_args)
-        retweet_count = 0
-        favorite_count = 0
+        retweet_count, favorite_count = 0, 0
         for tweet in timeline_data:
             retweet_count += tweet['retweet_count']
             favorite_count += tweet['favorite_count']
-        twr_data_args = {
-            'retweet_count': retweet_count,
-            'favorite_count': favorite_count,
-            'statuses_count': user_data['statuses_count'],
-            'listed_count': user_data['listed_count'],
-            'followers_count': user_data['followers_count'],
-            'tw_data': tw_data
-        }
+        twr_data_args = {'retweet_count': retweet_count,
+                         'favorite_count': favorite_count, 'tw_data': tw_data}
+        twitter_regularly_data_fields = ['statuses_count', 'listed_count',
+                                         'followers_count']
+        for tw_attr in twitter_regularly_data_fields:
+            if tw_attr in user_data:
+                twr_data_args[tw_attr] = user_data[tw_attr]
         TwitterRegularlyData.objects.create(**twr_data_args)
 
 

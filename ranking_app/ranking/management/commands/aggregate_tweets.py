@@ -9,9 +9,9 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('-cn', nargs=1, type=str, required=True,
-                            help='登録済みのコンテンツの名前')
+                            help='（必須）登録済みのコンテンツの名前')
         parser.add_argument('-sn', nargs=1, type=str, required=True,
-                            help='検索するtwitterアカウントのscreen name')
+                            help='（必須）検索するtwitterアカウントのscreen name')
 
     def handle(self, *args, **options):
         content_name = options['cn'].pop()
