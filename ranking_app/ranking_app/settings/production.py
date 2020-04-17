@@ -6,7 +6,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 TEMPLATES = [
     {
@@ -30,3 +30,23 @@ TEMPLATES = [
         },
     },
 ]
+
+DATABASES = {
+    'default': {
+        'ENGINE': env('DB_ENGINE'),
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': env('DB_HOST'),
+        'PORT': env('DB_PORT'),
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+            'sql_mode': 'TRADITIONAL,NO_AUTO_VALUE_ON_ZERO,ONLY_FULL_GROUP_BY,'
+        },
+        'ATOMIC_REQUESTS': True,
+    }
+}
+
+# TODO (sumitani) 本番環境でのLOG設定を追加する
+
+# TODO (sumitani) staticファイルを配信する時に本番環境では、プロキシサーバなどに配置するように設定する
