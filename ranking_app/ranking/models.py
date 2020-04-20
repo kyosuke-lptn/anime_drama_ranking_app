@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from django.db import models
 from django.db import transaction
@@ -32,21 +33,11 @@ class Content(models.Model):
     def __str__(self):
         return self.name
 
-    # def data(self):
-    #     return {
-    #         data.display_create_date(): [
-    #             data.retweets_avg(), data.favorite_avg(), data.listed_count,
-    #             data.followers_count, data.statuses_count
-    #         ]
-    #         for data in self.twitterdata_set.all()
-    #         for data in data.twitterregularlydata_set.all()
-    #     }
-
 
 class TwitterUser(models.Model):
     name = models.CharField(max_length=50, db_index=True)
-    content = models.ForeignKey(Content, on_delete=models.CASCADE,
-                                verbose_name='作品')
+    content = models.OneToOneField(Content, on_delete=models.CASCADE,
+                                   verbose_name='作品')
     description = models.TextField('twitterからの詳細情報', null=True, blank=True)
     official_url = models.CharField('公式URL', max_length=500, null=True,
                                     blank=True)
@@ -66,7 +57,7 @@ class TwitterUser(models.Model):
     update_date = models.DateTimeField('更新日', auto_now=True)
 
     def __str__(self):
-        return self.update_date.strftime("%Y/%m/%d %H:%M:%S")
+        return self.name
 
     def retweets_avg(self):
         result = self.all_retweet_count / self.all_tweet_count
@@ -78,7 +69,7 @@ class TwitterUser(models.Model):
 
 
 class Tweet(models.Model):
-    tweet_id = models.PositiveIntegerField('ツイートID', unique=True)
+    tweet_id = models.CharField('ツイートID', unique=True, max_length=100)
     text = models.TextField('内容')
     retweet_count = models.PositiveIntegerField('リツート数')
     favorite_count = models.PositiveIntegerField('いいね数')
@@ -87,9 +78,6 @@ class Tweet(models.Model):
     tweet_date = models.DateTimeField('ツイート日')
     create_date = models.DateTimeField('ツイート取得日', auto_now_add=True)
     update_date = models.DateTimeField('ツイート取得更新日', auto_now=True)
-
-    # def last_id(self):
-    #
 
 
 TIMELINE_COUNT = '200'
@@ -171,14 +159,6 @@ class TwitterApi(object):
                     twitter_user_args[attr_key] = attr_value
         return TwitterUser.objects.create(**twitter_user_args)
 
-        # twitter_user = TwitterUser.objects.create(
-        #     content=content, name=user_data['name'],
-        #     official_url=user_data['url'], description=user_data['description'],
-        #     icon_url=user_data['profile_image_url_https'],
-        #     banner_url=user_data['profile_banner_url'],
-        #     followers_count=user_data['followers_count'])
-        # return twitter_user
-
     @staticmethod
     def create_tweets(timeline_data, twitter_user):
         """
@@ -191,9 +171,12 @@ class TwitterApi(object):
         for tweet in timeline_data:
             retweet_count += tweet['retweet_count']
             favorite_count += tweet['favorite_count']
+            tweet_time = tweet['created_at']
+            converted_time = datetime.strptime(
+                tweet_time, '%a %b %d %H:%M:%S %z %Y')
             tweet_obj = Tweet.objects.create(
-                twitter_user=twitter_user, tweet_id=tweet['id'],
-                tweet_date=tweet['created_at'], text=tweet['text'],
+                twitter_user=twitter_user, tweet_id=tweet['id_str'],
+                tweet_date=converted_time, text=tweet['text'],
                 retweet_count=tweet['retweet_count'],
                 favorite_count=tweet['favorite_count'])
             tweets_list.append(tweet_obj)
@@ -210,9 +193,12 @@ class TwitterApi(object):
         for tweet in timeline_data:
             retweet_count += tweet['retweet_count']
             favorite_count += tweet['favorite_count']
+            tweet_time = tweet['created_at']
+            converted_time = datetime.strptime(
+                tweet_time, '%a %b %d %H:%M:%S %z %Y')
             Tweet.objects.create(
-                twitter_user=twitter_user, tweet_id=tweet['id'],
-                tweet_date=tweet['created_at'], text=tweet['text'],
+                twitter_user=twitter_user, tweet_id=tweet['id_str'],
+                tweet_date=converted_time, text=tweet['text'],
                 retweet_count=tweet['retweet_count'],
                 favorite_count=tweet['favorite_count'])
         twitter_user.all_tweet_count = len(timeline_data)

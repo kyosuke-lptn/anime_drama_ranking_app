@@ -12,7 +12,6 @@ def support_datetime_default(obj):
     raise TypeError(repr(obj) + " is not JSON serializable")
 
 
-id_list = [num for num in range(200, 0, -1)]
 fake = Faker('ja_JP')
 
 
@@ -21,11 +20,14 @@ class TwitterResponseMock(object):
         self.text = json.dumps(text, default=support_datetime_default)
 
 
-def response_user_mock(name, url=fake.url(), contain_image_url=True):
+def response_user_mock(name, url=fake.url(), contain_image_url=True,
+                       contain_banner=True):
     text = {'name': name, 'description': fake.text(),
             'url': url, 'followers_count': random.randrange(500)}
     if contain_image_url:
         text['profile_image_url_https'] = fake.image_url()
+    if contain_banner:
+        text['profile_banner_url'] = fake.image_url()
     return TwitterResponseMock(text)
 
 
@@ -34,11 +36,12 @@ def response_timeline_mock(text=fake.text()):
     start_time = datetime(2000, 1, 1, tzinfo=ja_tz)
     response_list = []
     for num in range(50):
+        time = fake.date_time_ad(tzinfo=ja_tz, start_datetime=start_time)
+        convert_time = time.strftime('%a %b %d %H:%M:%S %z %Y')
         response_list.append({
-            'id': id_list.pop(0), 'text': text,
-            'created_at': fake.date_time_ad(tzinfo=ja_tz,
-                                            start_datetime=start_time),
-            'retweet_count': random.randrange(500),
+            'id': fake.random_number(digits=20), 'text': text,
+            'id_str': str(fake.random_number(digits=20)),
+            'created_at': convert_time, 'retweet_count': random.randrange(500),
             'favorite_count': random.randrange(500)})
     text_list = response_list
     return TwitterResponseMock(text_list)

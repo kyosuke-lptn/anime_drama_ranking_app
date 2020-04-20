@@ -107,6 +107,7 @@ class TwitterApiModelTests(TestCase):
         self.mock_oauth1session_get.side_effect = [
             response_user_mock(name=name),
             response_timeline_mock(),
+            response_timeline_mock(),
             response_empty_mock()]
 
         TwitterApi().get_and_store_twitter_data(self.screen_name)
@@ -114,8 +115,8 @@ class TwitterApiModelTests(TestCase):
         twitter_user_check = TwitterUser.objects.filter(name=name).exists()
         tweet_count = Tweet.objects.all().count()
         self.assertEqual(twitter_user_check, True)
-        self.assertEqual(tweet_count, 50)
-        self.assertEqual(self.mock_oauth1session_get.call_count, 3)
+        self.assertEqual(tweet_count, 100)
+        self.assertEqual(self.mock_oauth1session_get.call_count, 4)
 
     def test_get_and_store_twitter_data_without_image_url(self):
         name = 'sample user'
