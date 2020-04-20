@@ -1,57 +1,61 @@
-import datetime
+from datetime import datetime
 import random
 
-from django.utils import timezone
 import factory
+from pytz import timezone
 
 from . import models
 
-
-class ContentFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = models.Content
-
-    content_name = factory.Faker('word')
-    description = factory.Faker('sentence', nb_words=12)
-    release_date = timezone.localtime() - datetime.timedelta(days=365, hours=10)
-    maker = factory.Faker('company', locale='ja')
+JA_TZ = timezone('Asia/Tokyo')
+START_TIME = datetime(2000, 1, 1, tzinfo=JA_TZ)
 
 
 class CategoryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Category
 
-    category_name = factory.Iterator(['アニメ', '漫画', '映画', 'ドラマ'])
-
-    @factory.post_generation
-    def contents(self, create, extracted, **kwargs):
-        if not create:
-            # Simple build, do nothing.
-            return
-
-        if extracted:
-            # A list of groups were passed in, use them
-            for content in extracted:
-                self.contents.add(content)
+    name = factory.Iterator(['アニメ', 'ドラマ'])
 
 
-class TwitterDataFactory(factory.django.DjangoModelFactory):
+class ContentFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = models.TwitterData
+        model = models.Content
 
-    tw_screen_name = factory.Faker('name')
-    tw_description = factory.Faker('sentence', nb_words=12)
+    name = factory.Faker('word', locale='ja')
+    description = factory.Faker('sentence', nb_words=20, locale='ja')
+    release_date = factory.Faker('date_time_ad',
+                                 tzinfo=JA_TZ,
+                                 start_datetime=START_TIME)
+    maker = factory.Faker('company', locale='ja')
+    screen_name = factory.Sequence(lambda n: 'user%d' % n)
+    category = factory.SubFactory(CategoryFactory)
+
+
+class TwitterUserFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.TwitterUser
+
+    name = factory.Faker('user_name', locale='ja')
     content = factory.SubFactory(ContentFactory)
-
-
-class TwitterRegularlyDataFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = models.TwitterRegularlyData
-
-    retweet_count = random.randrange(1000, 5000)
-    favorite_count = random.randrange(1000, 5000)
-    statuses_count = random.randrange(1000, 3000)
-    listed_count = random.randrange(1000)
+    description = factory.Faker('sentence', nb_words=20, locale='ja')
+    official_url = factory.Faker('url', locale='ja')
+    icon_url = factory.Faker('image_url', locale='ja')
+    banner_url = factory.Faker('image_url', locale='ja')
+    all_tweet_count = random.randrange(1000, 5000)
+    all_retweet_count = random.randrange(1000, 5000)
+    all_favorite_count = random.randrange(1000, 3000)
     followers_count = random.randrange(6000, 100000)
-    tw_data = factory.SubFactory(TwitterDataFactory)
 
+
+class TweetFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.Tweet
+
+    tweet_id = factory.Sequence(lambda n: n)
+    text = factory.Faker('sentence', nb_words=12, locale='ja')
+    retweet_count = random.randrange(1000)
+    favorite_count = random.randrange(1000)
+    tweet_date = factory.Faker('date_time_ad',
+                               tzinfo=JA_TZ,
+                               start_datetime=START_TIME)
+    twitter_user = factory.SubFactory(TwitterUserFactory)
