@@ -12,12 +12,23 @@ class Content(models.Model):
     content_name = models.CharField('作品名', max_length=50, unique=True,
                                     db_index=True)
     description = models.TextField('詳細説明')
-    release_date = models.DateTimeField('リリース日', db_index=True)
+    release_date = models.DateField('リリース日', db_index=True, null=True,
+                                    blank=True)
     maker = models.CharField('作り手', max_length=50, db_index=True)
     update_date = models.DateTimeField('更新日', auto_now=True)
 
     def __str__(self):
         return self.content_name
+
+    def data(self):
+        return {
+            data.display_create_date(): [
+                data.retweets_avg(), data.favorite_avg(), data.listed_count,
+                data.followers_count, data.statuses_count
+            ]
+            for data in self.twitterdata_set.all()
+            for data in data.twitterregularlydata_set.all()
+        }
 
 
 class Category(models.Model):
@@ -44,6 +55,9 @@ class TwitterData(models.Model):
     create_date = models.DateTimeField('作成日', auto_now_add=True)
     update_date = models.DateTimeField('更新日', auto_now=True)
 
+    def __str__(self):
+        return self.update_date.strftime("%Y/%m/%d %H:%M:%S")
+
 
 class TwitterRegularlyData(models.Model):
     retweet_count = models.PositiveIntegerField('リツイート総数', null=True,
@@ -67,6 +81,12 @@ class TwitterRegularlyData(models.Model):
     def favorite_avg(self):
         result = self.favorite_count / self.statuses_count
         return round(result, 2)
+
+    def display_create_date(self):
+        return self.create_date.strftime("%Y/%m/%d %H:%M:%S")
+
+    def __str__(self):
+        return self.display_create_date()
 
 
 TIMELINE_COUNT = '200'

@@ -3,6 +3,8 @@
 # css compile file
 ranking_app/static/ranking/*
 
+# mysql env
+.env_sample
 
 # 環境変数
 .env
