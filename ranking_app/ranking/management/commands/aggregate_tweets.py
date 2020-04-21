@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from ...models import TwitterApi, Content
+from ...models import TwitterApi
 
 
 class Command(BaseCommand):

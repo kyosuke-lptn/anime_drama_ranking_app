@@ -216,3 +216,6 @@ class TwitterApi(object):
         timeline_data = self.get_most_timeline(screen_name)
         twitter_user = self.store_user_data(screen_name, user_data)
         self.store_timeline_data(timeline_data, twitter_user)
+
+    # def update_timeline(self):
+

@@ -1,14 +1,12 @@
-import json
 from unittest import mock
+import random
 
 from django.db.utils import IntegrityError, DataError
 from django.test import TestCase
 
 from ranking import factory
-from ranking.mock import response_user_mock
-from ranking.mock import response_timeline_mock
-from ranking.mock import response_empty_mock
-from ranking.models import TwitterApi, TwitterUser,Tweet
+from ranking.mock import response_data_mock
+from ranking.models import TwitterApi, TwitterUser, Tweet, Content
 
 # Create your tests here.
 
@@ -71,61 +69,58 @@ class TwitterUserModelTests(TestCase):
 class TwitterApiModelTests(TestCase):
 
     def setUp(self):
-        self.patcher = mock.patch('requests_oauthlib.OAuth1Session.get')
-        self.mock_oauth1session_get = self.patcher.start()
+        self.timeline_patcher = mock.patch('ranking.models.TwitterApi.get_base')
+        self.mock_get_base = self.timeline_patcher.start()
         self.screen_name = 'sample_screen_name'
         factory.ContentFactory(screen_name=self.screen_name)
 
     def tearDown(self):
-        self.patcher.stop()
+        self.timeline_patcher.stop()
 
     def test_get_user(self):
-        name = 'test name'
-        url = "http: // sample.com"
-        self.mock_oauth1session_get.return_value = response_user_mock(
-            name=name, url=url)
+        self.mock_get_base.side_effect = response_data_mock
 
-        user = TwitterApi().get_user('test_screen_name')
+        TwitterApi().get_user('test_screen_name')
 
-        self.assertEqual(user['name'], name)
-        self.assertEqual(user['url'], url)
-        self.mock_oauth1session_get.assert_called_once()
+        self.mock_get_base.assert_called_once()
 
-    def test_get_most_timeline_call_twice(self):
-        text = 'test description'
-        self.mock_oauth1session_get.side_effect = [
-            response_timeline_mock(text=text),
-            response_empty_mock()]
+    def test_get_most_timeline_call_three_times(self):
+        self.mock_get_base.side_effect = response_data_mock
 
-        timeline = TwitterApi().get_most_timeline('test name')
+        TwitterApi().get_most_timeline('test name')
 
-        self.assertEqual(timeline[0]['text'], text)
-        self.assertEqual(self.mock_oauth1session_get.call_count, 2)
+        self.assertEqual(self.mock_get_base.call_count, 3)
 
     def test_get_and_store_twitter_data(self):
-        name = 'sample user'
-        self.mock_oauth1session_get.side_effect = [
-            response_user_mock(name=name),
-            response_timeline_mock(),
-            response_timeline_mock(),
-            response_empty_mock()]
+        self.mock_get_base.side_effect = response_data_mock
 
         TwitterApi().get_and_store_twitter_data(self.screen_name)
 
-        twitter_user_check = TwitterUser.objects.filter(name=name).exists()
-        tweet_count = Tweet.objects.all().count()
-        self.assertEqual(twitter_user_check, True)
+        twitter_user = Content.objects.get(
+            screen_name=self.screen_name).twitteruser
+        tweet_count = twitter_user.tweet_set.all().count()
         self.assertEqual(tweet_count, 100)
-        self.assertEqual(self.mock_oauth1session_get.call_count, 4)
+        self.assertEqual(self.mock_get_base.call_count, 4)
 
     def test_get_and_store_twitter_data_without_image_url(self):
-        name = 'sample user'
-        self.mock_oauth1session_get.side_effect = [
-            response_user_mock(name=name, contain_image_url=False),
-            response_timeline_mock(),
-            response_empty_mock()]
+        self.mock_get_base.side_effect = response_data_mock
 
         TwitterApi().get_and_store_twitter_data(self.screen_name)
 
-        twitter_user_check = TwitterUser.objects.filter(name=name).exists()
-        self.assertEqual(twitter_user_check, True)
+        twitter_user = Content.objects.get(
+            screen_name=self.screen_name).twitteruser
+        self.assertIsNone(twitter_user.icon_url, None)
+        self.assertIsNone(twitter_user.banner_url, None)
+
+    # def test_update_twitter_data(self):
+    #     twitter_user = factory.TwitterUserFactory(name='test1')
+    #     tweets = factory.TweetFactory(
+    #         twitter_user=twitter_user).create_batch(50)
+    #     self.mock_get_base.side_effect = response_data_mock
+    #
+    #     TwitterApi().update_date()
+    #
+    #     updated_twitter_user = TwitterUser.objects.get(pk=twitter_user.pk)
+    #     updated_tweet_count = updated_twitter_user.tweet_set.all().count()
+    #     self.assertNotEqual(twitter_user, updated_twitter_user)
+    #     self.assertGreater(updated_tweet_count, len(tweets))
