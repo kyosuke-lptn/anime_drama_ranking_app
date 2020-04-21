@@ -12,5 +12,5 @@ def index(request):
     return HttpResponse(template.render())
 
 def show(request):
-    template = loader.get_template('ranking/show.html.haml')
+    template = loader.get_template('ranking/detail.html.haml')
     return HttpResponse(template.render())
