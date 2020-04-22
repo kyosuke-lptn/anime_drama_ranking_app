@@ -1,12 +1,14 @@
 from unittest import mock
-import random
 
-from django.db.utils import IntegrityError, DataError
+from django.db.utils import IntegrityError
+from django.db.utils import DataError
 from django.test import TestCase
 
 from ranking import factory
 from ranking.mock import response_data_mock
-from ranking.models import TwitterApi, TwitterUser, Tweet, Content
+from ranking.models import TwitterApi
+from ranking.models import TwitterUser
+from ranking.models import Content
 
 # Create your tests here.
 
@@ -72,28 +74,23 @@ class TwitterApiModelTests(TestCase):
         self.timeline_patcher = mock.patch('ranking.models.TwitterApi.get_base')
         self.mock_get_base = self.timeline_patcher.start()
         self.screen_name = 'sample_screen_name'
-        factory.ContentFactory(screen_name=self.screen_name)
+        self.content = factory.ContentFactory(screen_name=self.screen_name)
+        self.mock_get_base.side_effect = response_data_mock
 
     def tearDown(self):
         self.timeline_patcher.stop()
 
     def test_get_user(self):
-        self.mock_get_base.side_effect = response_data_mock
-
         TwitterApi().get_user('test_screen_name')
 
         self.mock_get_base.assert_called_once()
 
     def test_get_most_timeline_call_three_times(self):
-        self.mock_get_base.side_effect = response_data_mock
-
         TwitterApi().get_most_timeline('test name')
 
         self.assertEqual(self.mock_get_base.call_count, 3)
 
     def test_get_and_store_twitter_data(self):
-        self.mock_get_base.side_effect = response_data_mock
-
         TwitterApi().get_and_store_twitter_data(self.screen_name)
 
         twitter_user = Content.objects.get(
@@ -103,8 +100,6 @@ class TwitterApiModelTests(TestCase):
         self.assertEqual(self.mock_get_base.call_count, 4)
 
     def test_get_and_store_twitter_data_without_image_url(self):
-        self.mock_get_base.side_effect = response_data_mock
-
         TwitterApi().get_and_store_twitter_data(self.screen_name)
 
         twitter_user = Content.objects.get(
@@ -112,15 +107,13 @@ class TwitterApiModelTests(TestCase):
         self.assertIsNone(twitter_user.icon_url, None)
         self.assertIsNone(twitter_user.banner_url, None)
 
-    # def test_update_twitter_data(self):
-    #     twitter_user = factory.TwitterUserFactory(name='test1')
-    #     tweets = factory.TweetFactory(
-    #         twitter_user=twitter_user).create_batch(50)
-    #     self.mock_get_base.side_effect = response_data_mock
-    #
-    #     TwitterApi().update_date()
-    #
-    #     updated_twitter_user = TwitterUser.objects.get(pk=twitter_user.pk)
-    #     updated_tweet_count = updated_twitter_user.tweet_set.all().count()
-    #     self.assertNotEqual(twitter_user, updated_twitter_user)
-    #     self.assertGreater(updated_tweet_count, len(tweets))
+    def test_update_twitter_data(self):
+        twitter_user = factory.TwitterUserFactory(content=self.content)
+        factory.TweetFactory(twitter_user=twitter_user, tweet_id='1')
+
+        TwitterApi().update_data(self.screen_name)
+
+        updated_twitter_user = TwitterUser.objects.get(pk=twitter_user.pk)
+        updated_tweet_count = updated_twitter_user.tweet_set.all().count()
+        self.assertNotEqual(twitter_user.name, updated_twitter_user.name)
+        self.assertGreater(updated_tweet_count, 1)

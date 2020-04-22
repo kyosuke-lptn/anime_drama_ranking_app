@@ -107,7 +107,7 @@ class TwitterApi(object):
         result = json.loads(response.text)
         return result
 
-    def get_simple_timeline(self, screen_name, max_id=None):
+    def get_simple_timeline(self, screen_name, max_id=None, since_id=None):
         timeline_url = "https://api.twitter.com/1.1/statuses/user_timeline.json"
         query = {
             "screen_name": screen_name,
@@ -116,13 +116,15 @@ class TwitterApi(object):
             "include_rts": TIMELINE_INCLUDE_RTS}
         if max_id:
             query["max_id"] = max_id
+        if since_id:
+            query["since_id"] = since_id
         return self.get_base(timeline_url, query)
 
     def get_most_timeline(self, screen_name):
         timeline = self.get_simple_timeline(screen_name)
         next_id = timeline[-1]["id"] - 1
         while True:
-            result = self.get_simple_timeline(screen_name, next_id)
+            result = self.get_simple_timeline(screen_name, max_id=next_id)
             timeline.extend(result)
             if result:
                 next_id = result[-1]["id"] - 1
@@ -136,16 +138,16 @@ class TwitterApi(object):
         return self.get_base(user_url, query)
 
     @staticmethod
-    def store_user_data(screen_name, user_data):
+    def store_user(screen_name, user_data):
         """
-        get_userメソッドで取得したデータをTwitterUserに保存する
+        get_userメソッドで取得したデータを元にTwitterUserモデル作成・アップデートする
         :param screen_name: str
         :param user_data: obj　
         :return TwitterUser: obj
         """
         content = Content.objects.get(screen_name=screen_name)
-        twitter_user_args = {'name': user_data['name'], 'content': content}
-        fields_list = ['url', 'description', 'profile_image_url_https',
+        twitter_user_args = {}
+        fields_list = ['name', 'url', 'description', 'profile_image_url_https',
                        'profile_banner_url', 'followers_count']
         for attr_key, attr_value in user_data.items():
             if attr_key in fields_list:
@@ -157,30 +159,8 @@ class TwitterApi(object):
                     twitter_user_args['banner_url'] = attr_value
                 else:
                     twitter_user_args[attr_key] = attr_value
-        return TwitterUser.objects.create(**twitter_user_args)
-
-    @staticmethod
-    def create_tweets(timeline_data, twitter_user):
-        """
-        引数のtimelineデータのTweetモデルを作成する
-        :param timeline_data: list
-        :param twitter_user: obj
-        :return リツイート総数、イイね総数、作成したtweetモデルのリスト: tuple
-        """
-        retweet_count, favorite_count, tweets_list = 0, 0, []
-        for tweet in timeline_data:
-            retweet_count += tweet['retweet_count']
-            favorite_count += tweet['favorite_count']
-            tweet_time = tweet['created_at']
-            converted_time = datetime.strptime(
-                tweet_time, '%a %b %d %H:%M:%S %z %Y')
-            tweet_obj = Tweet.objects.create(
-                twitter_user=twitter_user, tweet_id=tweet['id_str'],
-                tweet_date=converted_time, text=tweet['text'],
-                retweet_count=tweet['retweet_count'],
-                favorite_count=tweet['favorite_count'])
-            tweets_list.append(tweet_obj)
-        return retweet_count, favorite_count, tweets_list
+        return TwitterUser.objects.update_or_create(
+            defaults=twitter_user_args, content=content)[0]
 
     @staticmethod
     def store_timeline_data(timeline_data, twitter_user):
@@ -209,13 +189,36 @@ class TwitterApi(object):
     @transaction.atomic
     def get_and_store_twitter_data(self, screen_name):
         """
-        TwitterAPIからデータを取得して,TwitterUserとTwitter
+        TwitterAPIからデータを取得して,TwitterUserとTweetのモデルを作る
         :param screen_name: str
         """
         user_data = self.get_user(screen_name)
         timeline_data = self.get_most_timeline(screen_name)
-        twitter_user = self.store_user_data(screen_name, user_data)
+        twitter_user = self.store_user(screen_name, user_data)
         self.store_timeline_data(timeline_data, twitter_user)
 
-    # def update_timeline(self):
+    @transaction.atomic
+    def update_data(self, screen_name):
+        """
+        TwitterAPIからのデータを取得して、TwitterUserとTweetのモデルをアップデートする
+        :param screen_name: str
+        """
+        # 最新の取得済みツイートを持ってくる（id）
+        twitter_user = Content.objects.get(screen_name=screen_name).twitteruser
+        latest_tweet = twitter_user.tweet_set.order_by('-tweet_date')[0]
+        latest_id = int(latest_tweet.tweet_id)
 
+        # ツイートを取得する
+        user_data = self.get_user(screen_name)
+        timeline = self.get_simple_timeline(screen_name, since_id=latest_id)
+        next_id = timeline[0]['id']
+        while True:
+            result = self.get_simple_timeline(screen_name, since_id=next_id)
+            timeline.extend(result)
+            if result:
+                next_id = result[0]['id']
+            else:
+                break
+        # ツイートを保存する
+        updated_twitter_user = self.store_user(screen_name, user_data)
+        self.store_timeline_data(timeline, updated_twitter_user)

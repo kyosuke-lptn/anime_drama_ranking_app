@@ -1,5 +1,4 @@
 from datetime import datetime
-import json
 from pytz import timezone
 import random
 
@@ -13,22 +12,6 @@ def support_datetime_default(obj):
 
 
 fake = Faker('ja_JP')
-
-
-class TwitterResponseMock(object):
-    def __init__(self, text):
-        self.text = json.dumps(text, default=support_datetime_default)
-
-
-def response_user_mock(name, url=fake.url(), contain_icon_url=True,
-                       contain_banner=True):
-    text = {'name': name, 'description': fake.text(),
-            'url': url, 'followers_count': random.randrange(500)}
-    if contain_icon_url:
-        text['profile_image_url_https'] = fake.image_url()
-    if contain_banner:
-        text['profile_banner_url'] = fake.image_url()
-    return TwitterResponseMock(text)
 
 
 def response_data_mock(url, query):
@@ -45,6 +28,9 @@ def response_data_mock(url, query):
             max_id += 2
         else:
             max_id = 0
+        if 'since_id' in query:
+            max_id = query['since_id']
+            max_id += 49
         for tweet_id in range(max_id, max_id + 50):
             time = fake.date_time_ad(tzinfo=ja_tz, start_datetime=start_time)
             convert_time = time.strftime('%a %b %d %H:%M:%S %z %Y')
