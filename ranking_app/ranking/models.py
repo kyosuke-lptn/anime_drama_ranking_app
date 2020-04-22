@@ -138,14 +138,16 @@ class TwitterApi(object):
         return self.get_base(user_url, query)
 
     @staticmethod
-    def store_user(screen_name, user_data):
+    def store_user(screen_name, user_data, content=None):
         """
         get_userメソッドで取得したデータを元にTwitterUserモデル作成・アップデートする
         :param screen_name: str
         :param user_data: obj　
+        :param content: obj　
         :return TwitterUser: obj
         """
-        content = Content.objects.get(screen_name=screen_name)
+        if not content:
+            content = Content.objects.get(screen_name=screen_name)
         twitter_user_args = {}
         fields_list = ['name', 'url', 'description', 'profile_image_url_https',
                        'profile_banner_url', 'followers_count']
@@ -204,7 +206,8 @@ class TwitterApi(object):
         :param screen_name: str
         """
         # 最新の取得済みツイートを持ってくる（id）
-        twitter_user = Content.objects.get(screen_name=screen_name).twitteruser
+        content = Content.objects.get(screen_name=screen_name)
+        twitter_user = content.twitteruser
         latest_tweet = twitter_user.tweet_set.order_by('-tweet_date')[0]
         latest_id = int(latest_tweet.tweet_id)
 
@@ -220,5 +223,5 @@ class TwitterApi(object):
             else:
                 break
         # ツイートを保存する
-        updated_twitter_user = self.store_user(screen_name, user_data)
+        updated_twitter_user = self.store_user(screen_name, user_data, content)
         self.store_timeline_data(timeline, updated_twitter_user)
