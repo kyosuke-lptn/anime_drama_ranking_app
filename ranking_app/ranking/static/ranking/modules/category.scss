@@ -1,0 +1,78 @@
+.category {
+  width: 60%;
+  margin: 0 auto;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  h1 {
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
+  }
+  &__box {
+    margin: 1em 0;
+    padding: 1em;
+    position: relative;
+    border: 1px solid #555;
+    margin: 50px 0;
+    &__title {
+      font-size: 20px;
+      font-weight: bolder;
+      position: absolute;
+      top: -0.8em;
+      left: 20px;
+      background: #FFFFF0;
+      padding: 0 0.8em;
+    }
+    &__media {
+      display: inline-block;
+      margin-top: 20px;
+      img {
+        height: 200px;
+        width: auto;
+        float: left;
+        margin-right: 15px;
+      }
+      &__info {
+        font-size: 15px;
+        &__genre {
+          margin-top: 10px;
+        }
+        &__synopsis {
+          margin-top: 10px;
+        }
+        &__cast {
+          margin-top: 10px;
+          ul {
+            position: relative;
+            li {
+              display: inline-block;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+hr {
+  border-width: 1px 0px 0px 0px;
+  border-style: dashed;
+}
+
+//ナンバリング
+.category {
+  counter-reset: ranking-mark;
+  .category__box__title :before{
+    content: counter(ranking-mark);
+    counter-increment: ranking-mark;
+    background: #999;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 14px;
+    line-height: 1;
+    padding: 8px 12px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin-left: 5px;
+  }
+}
