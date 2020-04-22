@@ -40,6 +40,13 @@ class ContentModelTests(TestCase):
         with self.assertRaises(DataError):
             factory.ContentFactory(maker=maker)
 
+    def test_has_tweets(self):
+        content = factory.ContentFactory()
+        twitter_user = factory.TwitterUserFactory(content=content)
+        factory.TweetFactory(twitter_user=twitter_user, tweet_id='1')
+
+        self.assertTrue(content.has_tweets())
+
 
 class CategoryModelTests(TestCase):
 
@@ -91,7 +98,7 @@ class TwitterApiModelTests(TestCase):
         self.assertEqual(self.mock_get_base.call_count, 3)
 
     def test_get_and_store_twitter_data(self):
-        TwitterApi().get_and_store_twitter_data(self.screen_name)
+        TwitterApi().get_and_store_twitter_data(self.content)
 
         twitter_user = Content.objects.get(
             screen_name=self.screen_name).twitteruser
@@ -100,7 +107,7 @@ class TwitterApiModelTests(TestCase):
         self.assertEqual(self.mock_get_base.call_count, 4)
 
     def test_get_and_store_twitter_data_without_image_url(self):
-        TwitterApi().get_and_store_twitter_data(self.screen_name)
+        TwitterApi().get_and_store_twitter_data(self.content)
 
         twitter_user = Content.objects.get(
             screen_name=self.screen_name).twitteruser
@@ -111,7 +118,7 @@ class TwitterApiModelTests(TestCase):
         twitter_user = factory.TwitterUserFactory(content=self.content)
         factory.TweetFactory(twitter_user=twitter_user, tweet_id='1')
 
-        TwitterApi().update_data(self.screen_name)
+        TwitterApi().update_data(self.content)
 
         updated_twitter_user = TwitterUser.objects.get(pk=twitter_user.pk)
         updated_tweet_count = updated_twitter_user.tweet_set.all().count()

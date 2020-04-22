@@ -33,6 +33,11 @@ class Content(models.Model):
     def __str__(self):
         return self.name
 
+    def has_tweets(self):
+        if hasattr(self, 'twitteruser') and hasattr(self.twitteruser, 'tweet_set'):
+            return True
+        return False
+
 
 class TwitterUser(models.Model):
     name = models.CharField(max_length=50, db_index=True)
@@ -143,7 +148,7 @@ class TwitterApi(object):
         get_userメソッドで取得したデータを元にTwitterUserモデル作成・アップデートする
         :param screen_name: str
         :param user_data: obj　
-        :param content: obj　
+        :param content: obj　コンテンツがあればTwitterUserのupdate、なければcreateになる
         :return TwitterUser: obj
         """
         if not content:
@@ -189,24 +194,25 @@ class TwitterApi(object):
         twitter_user.save()
 
     @transaction.atomic
-    def get_and_store_twitter_data(self, screen_name):
+    def get_and_store_twitter_data(self, content):
         """
         TwitterAPIからデータを取得して,TwitterUserとTweetのモデルを作る
-        :param screen_name: str
+        :param content: obj
         """
+        screen_name = content.screen_name
         user_data = self.get_user(screen_name)
         timeline_data = self.get_most_timeline(screen_name)
         twitter_user = self.store_user(screen_name, user_data)
         self.store_timeline_data(timeline_data, twitter_user)
 
     @transaction.atomic
-    def update_data(self, screen_name):
+    def update_data(self, content):
         """
         TwitterAPIからのデータを取得して、TwitterUserとTweetのモデルをアップデートする
-        :param screen_name: str
+        :param content: obj
         """
         # 最新の取得済みツイートを持ってくる（id）
-        content = Content.objects.get(screen_name=screen_name)
+        screen_name = content.screen_name
         twitter_user = content.twitteruser
         latest_tweet = twitter_user.tweet_set.order_by('-tweet_date')[0]
         latest_id = int(latest_tweet.tweet_id)

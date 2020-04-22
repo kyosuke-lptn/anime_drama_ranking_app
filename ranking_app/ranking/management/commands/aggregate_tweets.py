@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 
+from ...models import Content
 from ...models import TwitterApi
 
 
@@ -14,7 +15,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         screen_name = options['sn'].pop()
         api = TwitterApi()
-        api.get_and_store_twitter_data(screen_name)
+        content = Content.objects.get(screen_name=screen_name)
+        if content.has_tweets():
+            api.update_data(content)
+        else:
+            api.get_and_store_twitter_data(content)
         print('データ取得完了しました！！')
-
-
