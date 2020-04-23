@@ -1,5 +1,5 @@
 .container {
-  margin-top: 80px;
+  padding-top: 80px;
   width: 100%;
   margin: auto;
   &__image {
@@ -47,9 +47,19 @@
       font-weight: bold;
       padding-left: 100px;
       margin-bottom: 20px;
-      img {
-        height: 200px;
-        width: auto;
+      a.topic {
+        text-decoration: none;
+        display: inline-block;
+        padding: 0.2em 0.4em;
+        transition: all .3s;
+        border-radius: 9px;
+      }
+      a.topic:link, a.topic:visited, a.topic:active {
+        color: black;
+      }
+      a.topic:hover {
+        color: #FFFFF0;
+        background-color: rgba(0, 0, 0, 0.500);
       }
     }
   }
@@ -63,14 +73,31 @@
   font-size: 20px;
   display: inline-block;
   vertical-align: top;
-  padding: 0 30px 0 0;
+  margin: 0 30px 0 0;
+  position: relative;
+  transition-duration: 0.5s;
   a {
+    text-decoration: none;
+  }
+  a:link, a:visited, a:active, a:hover {
+    color: black;
+  }
+  a:hover {
+    text-decoration:underline;
+  }
+  img {
+    height: 200px;
+    width: auto;
+    z-index: 5;
+  }
+  img:hover {
+    box-shadow: 10px 10px 10px rgba(0,0,0,0.5);
+    transform: translateY(-5px);
+    transition-duration: 0.5s;
+  }
+  p {
     display: block;
     font-size: 15px;
     width: 10em;
   }
-}
-
-p.saisho {
-
 }

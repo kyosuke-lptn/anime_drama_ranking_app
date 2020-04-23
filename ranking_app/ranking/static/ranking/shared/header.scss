@@ -39,6 +39,20 @@
         font-size: 25px;
         display: inline-block;
         left: -40%;
+        a {
+          text-decoration: none;
+          display: inline-block;
+          padding: 0.2em 0.4em;
+          transition: all .3s;
+          border-radius: 9px;
+        }
+        a:link, a:visited, a:active {
+          color: black;
+        }
+        a:hover {
+          color: #FFFFF0;
+	        background-color: rgba(0, 0, 0, 0.500);
+        }
       }
     }
   }
