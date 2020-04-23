@@ -52,25 +52,41 @@ class TwitterUser(models.Model):
                                   blank=True)
     followers_count = models.PositiveIntegerField('フォワー数', null=True,
                                                   blank=True)
-    all_tweet_count = models.PositiveIntegerField('取得したツイート数', null=True,
-                                                  blank=True)
-    all_retweet_count = models.PositiveIntegerField('リツイート総数', null=True,
-                                                    blank=True)
-    all_favorite_count = models.PositiveIntegerField('イイね総数', null=True,
-                                                     blank=True)
     create_date = models.DateTimeField('作成日', auto_now_add=True)
     update_date = models.DateTimeField('更新日', auto_now=True)
 
     def __str__(self):
         return self.name
 
+    def all_tweet_count(self):
+        return self.tweet_set.all().count()
+
+    def all_retweet_count(self):
+        count = 0
+        for tweet in self.tweet_set.all():
+            count += tweet.retweet_count
+        return count
+
+    def all_favorite_count(self):
+        count = 0
+        for tweet in self.tweet_set.all():
+            count += tweet.favorite_count
+        return count
+
     def retweets_avg(self):
-        result = self.all_retweet_count / self.all_tweet_count
+        if self.all_retweet_count() == 0 or self.all_retweet_count() == 0:
+            return 0
+        result = self.all_retweet_count() / self.all_tweet_count()
         return round(result, 2)
 
     def favorite_avg(self):
-        result = self.all_favorite_count / self.all_tweet_count
+        if self.all_favorite_count() == 0 or self.all_retweet_count() == 0:
+            return 0
+        result = self.all_favorite_count() / self.all_tweet_count()
         return round(result, 2)
+
+    def latest_tweet(self):
+        return self.tweet_set.order_by('-tweet_date')[0]
 
 
 class Tweet(models.Model):
@@ -147,7 +163,7 @@ class TwitterApi(object):
         """
         get_userメソッドで取得したデータを元にTwitterUserモデル作成・アップデートする
         :param screen_name: str
-        :param user_data: obj　
+        :param user_data: list　
         :param content: obj　コンテンツがあればTwitterUserのupdate、なければcreateになる
         :return TwitterUser: obj
         """
@@ -173,25 +189,22 @@ class TwitterApi(object):
     def store_timeline_data(timeline_data, twitter_user):
         """
         get_timelineメソッドで取得したデータをTwitterUserとTweetに保存する
-        :param timeline_data: obj
+        :param timeline_data: list
         :param twitter_user: obj
         """
-        retweet_count, favorite_count = 0, 0
-        for tweet in timeline_data:
-            retweet_count += tweet['retweet_count']
-            favorite_count += tweet['favorite_count']
-            tweet_time = tweet['created_at']
-            converted_time = datetime.strptime(
-                tweet_time, '%a %b %d %H:%M:%S %z %Y')
-            Tweet.objects.create(
-                twitter_user=twitter_user, tweet_id=tweet['id_str'],
-                tweet_date=converted_time, text=tweet['text'],
-                retweet_count=tweet['retweet_count'],
-                favorite_count=tweet['favorite_count'])
-        twitter_user.all_tweet_count = len(timeline_data)
-        twitter_user.all_retweet_count = retweet_count
-        twitter_user.all_favorite_count = favorite_count
-        twitter_user.save()
+        if timeline_data:
+            retweet_count, favorite_count = 0, 0
+            for tweet in timeline_data:
+                retweet_count += tweet['retweet_count']
+                favorite_count += tweet['favorite_count']
+                tweet_time = tweet['created_at']
+                converted_time = datetime.strptime(
+                    tweet_time, '%a %b %d %H:%M:%S %z %Y')
+                Tweet.objects.create(
+                    twitter_user=twitter_user, tweet_id=tweet['id_str'],
+                    tweet_date=converted_time, text=tweet['text'],
+                    retweet_count=tweet['retweet_count'],
+                    favorite_count=tweet['favorite_count'])
 
     @transaction.atomic
     def get_and_store_twitter_data(self, content):
@@ -215,12 +228,13 @@ class TwitterApi(object):
         screen_name = content.screen_name
         twitter_user = content.twitteruser
         latest_tweet = twitter_user.tweet_set.order_by('-tweet_date')[0]
-        latest_id = int(latest_tweet.tweet_id)
+        next_id = int(latest_tweet.tweet_id)
 
         # ツイートを取得する
         user_data = self.get_user(screen_name)
-        timeline = self.get_simple_timeline(screen_name, since_id=latest_id)
-        next_id = timeline[0]['id']
+        # timeline = self.get_simple_timeline(screen_name, since_id=next_id)
+        # next_id = timeline[0]['id']
+        timeline = []
         while True:
             result = self.get_simple_timeline(screen_name, since_id=next_id)
             timeline.extend(result)

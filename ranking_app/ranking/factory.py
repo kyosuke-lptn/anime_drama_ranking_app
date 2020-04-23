@@ -41,9 +41,6 @@ class TwitterUserFactory(factory.django.DjangoModelFactory):
     official_url = factory.Faker('url', locale='ja')
     icon_url = factory.Faker('image_url', locale='ja')
     banner_url = factory.Faker('image_url', locale='ja')
-    all_tweet_count = random.randrange(1000, 5000)
-    all_retweet_count = random.randrange(1000, 5000)
-    all_favorite_count = random.randrange(1000, 3000)
     followers_count = random.randrange(6000, 100000)
 
 

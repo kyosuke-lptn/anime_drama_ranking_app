@@ -64,15 +64,27 @@ class CategoryModelTests(TestCase):
 class TwitterUserModelTests(TestCase):
 
     def setUp(self):
-        self.data = factory.TwitterUserFactory(all_retweet_count=100,
-                                               all_favorite_count=50,
-                                               all_tweet_count=10)
+        self.twitter_user = factory.TwitterUserFactory()
 
     def test_retweets_avg(self):
-        self.assertEqual(self.data.retweets_avg(), 10)
+        for num in range(10):
+            factory.TweetFactory(tweet_id=str(num), retweet_count=10,
+                                 favorite_count=5,
+                                 twitter_user=self.twitter_user)
+        self.assertEqual(self.twitter_user.retweets_avg(), 10)
 
     def test_favorite_avg(self):
-        self.assertEqual(self.data.favorite_avg(), 5)
+        for num in range(10):
+            factory.TweetFactory(tweet_id=str(num), retweet_count=10,
+                                 favorite_count=5,
+                                 twitter_user=self.twitter_user)
+        self.assertEqual(self.twitter_user.favorite_avg(), 5)
+
+    def test_favorite_avg_with_0(self):
+        self.assertEqual(self.twitter_user.favorite_avg(), 0)
+
+    def test_retweets_avg_with_0(self):
+        self.assertEqual(self.twitter_user.retweets_avg(), 0)
 
 
 class TwitterApiModelTests(TestCase):
