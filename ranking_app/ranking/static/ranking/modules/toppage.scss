@@ -1,5 +1,5 @@
 .container {
-  padding-top: 95px;
+  margin-top: 80px;
   width: 100%;
   margin: auto;
   &__image {
@@ -7,18 +7,34 @@
     text-align: center;
     display: inline-block;
     position: relative;
-    p {
+    p.saisho {
       position: absolute;
-      color: white;
+      color: black;
       font-size: 45px;
-      top: 100px;
-      left: 100px;
-      font-family: 'M PLUS Rounded 1c', sans-serif;
+      top: 45%;
+      left: 67%;
+      font-family: 'Noto Serif JP', serif;
       z-index: 10;
+      background-color: white;
+      padding: 2px 5px 2px 5px;
+      }
+    p.ato {
+      position: absolute;
+      color: black;
+      font-size: 45px;
+      top: 55%;
+      left: 70%;
+      font-family: 'Slabo 27px', serif;
+      z-index: 10;
+      background-color: white;
+      padding: 2px 5px 2px 5px;
       }
     }
     img {
       text-align: center;
+      display: inline-block;
+      width: 100%;
+      height: auto;
     }
   &__info {
     width: 100%;
@@ -53,4 +69,8 @@
     font-size: 15px;
     width: 10em;
   }
+}
+
+p.saisho {
+
 }
