@@ -1,8 +1,12 @@
 .movies__detail {
+  position: relative;
   width: 60%;
+  height: auto;
   margin: 0 auto;
   font-family: 'M PLUS Rounded 1c', sans-serif;
   section {
+    margin-top: 10px;
+    height: 100%;
     h1 {
       font-size: 30px;
       font-weight: bolder;
@@ -26,19 +30,86 @@
       font-size: 25px;
       font-weight: bolder;
     }
+    &__info {
+      width: 100%;
+      height: auto;
+      display: inline-block;
+      margin-top: 20px;
+      .total {
+        float: left;
+        width: 50%;
+        height: 100%;
+      }
+      .ave {
+        float: right;
+        width: 50%;
+        height: 100%;
+      }
+      li {
+        margin-top: 5px;
+      }
+    }
     &__synopsis {
       margin-top: 20px;
       p {
         margin-top: 10px;
       }
     }
-    &__cast {
+    &__staff {
+      width: 100%;
+      height: auto;
+      display: inline-block;
       margin-top: 20px;
-      ul {
-        margin-top: 10px;
-        li {
-          margin-top: 5px;
+      &__cast {
+        float: left;
+        width: 50%;
+        height: 100%;
+        ul {
+          margin-top: 10px;
+          li {
+            margin-top: 5px;
+          }
         }
+      }
+      &__co {
+        width: 50%;
+        float: right;
+        &__production {
+          height: 50%;
+        }
+        &__behind {
+          margin-top: 10px;
+          height: 50%;
+        }
+      }
+    }
+    &__data {
+      width: 100%;
+      height: auto;
+      display: inline-block;
+      margin-top: 20px;
+      &__music {
+        float: left;
+        width: 50%;
+        height: 100%;
+      }
+      &__date {
+        float: right;
+        width: 50%;
+        height: 100%;
+      }
+    }
+    &__official {
+      margin: 20px 0 200px 0;
+      &__web {
+        float: left;
+        width: 50%;
+        height: 100%;
+      }
+      &__twitter {
+        float: right;
+        width: 50%;
+        height: 100%;
       }
     }
   }

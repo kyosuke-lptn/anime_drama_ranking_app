@@ -2,10 +2,13 @@
 
 - block main
   .category
-    %h1 New Arrivals
+    %p.first Latest
+    %p.second Animation
+    %p.third Ranking
     %img(src = "/static/ranking/images/top-sample2.jpg")
     .box
       .category__box
+        %a{href: '/detail'}
         .category__box__title 
           %h2 &emsp;&nbsp;ハゲハゲ＆Co.
         .category__box__media
@@ -26,6 +29,7 @@
                 %li ハゲハゲハゲ、
     .box
       .category__box
+        %a{href: '/detail'}
         .category__box__title
           %h2 &emsp;&nbsp;ハゲハゲ＆Co.
         .category__box__media
@@ -46,6 +50,7 @@
                 %li ハゲハゲハゲ、
     .box
       .category__box
+        %a{href: '/detail'}
         .category__box__title
           %h2 &emsp;&nbsp;ハゲハゲ＆Co.
         .category__box__media
