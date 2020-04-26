@@ -1,10 +1,17 @@
-import json
+from collections import Counter
 from datetime import datetime
+import json
+import re
+import time
 
+from bs4 import BeautifulSoup
 from django.db import models
 from django.db import transaction
 import environ
 from requests_oauthlib import OAuth1Session
+# from selenium import webdriver
+# from selenium.webdriver.chrome.options import Options
+import urllib3
 
 # Create your models here.
 
@@ -26,7 +33,7 @@ class Content(models.Model):
     update_date = models.DateTimeField('更新日', auto_now=True, db_index=True,
                                        null=True, blank=True)
     screen_name = models.CharField('twitter ID', max_length=50, unique=True,
-                                   db_index=True)
+                                   db_index=True, null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE,
                                  verbose_name='ジャンル', db_index=True)
 
@@ -34,7 +41,8 @@ class Content(models.Model):
         return self.name
 
     def has_tweets(self):
-        if hasattr(self, 'twitteruser') and hasattr(self.twitteruser, 'tweet_set'):
+        if hasattr(self, 'twitteruser') and hasattr(self.twitteruser,
+                                                    'tweet_set'):
             return True
         return False
 
@@ -232,8 +240,6 @@ class TwitterApi(object):
 
         # ツイートを取得する
         user_data = self.get_user(screen_name)
-        # timeline = self.get_simple_timeline(screen_name, since_id=next_id)
-        # next_id = timeline[0]['id']
         timeline = []
         while True:
             result = self.get_simple_timeline(screen_name, since_id=next_id)
@@ -245,3 +251,87 @@ class TwitterApi(object):
         # ツイートを保存する
         updated_twitter_user = self.store_user(screen_name, user_data, content)
         self.store_timeline_data(timeline, updated_twitter_user)
+
+
+ANIME_TOP_URL = 'https://anime.eiga.com'
+
+
+class ScrapingContent(object):
+    def __init__(self):
+        self.contents_data = []
+
+    def create_url(self, url='', anime_default=False):
+        if anime_default:
+            url = ANIME_TOP_URL + url
+        return url
+
+    def get_html_from(self, url):
+        http = urllib3.PoolManager()
+        response = http.request('GET', url)
+        return response
+
+    # def get_html_with_chrome_from(self, url):
+    #     options = Options()
+    #     options.binary_location = '/usr/bin/google-chrome'
+    #     options.add_argument('--headless')
+    #     options.add_argument("--disable-dev-shm-using")
+    #     # options.set_headless(True)
+    #     driver = webdriver.Chrome('chromedriver', options=options)
+    #     # driver = webdriver.Chrome(chrome_options=options)
+    #     driver.get(url)
+    #     return driver.page_source.encode('utf-8')
+
+    def extra_data_from(self, response):
+        soup = BeautifulSoup(response.data, 'lxml')
+        for p_tag in soup.find_all('p', {'class': 'seasonAnimeTtl'}):
+            for content in p_tag:
+                content_dict = {'name': content.text}
+                url = self.create_url(content['href'], anime_default=True)
+                html_data = self.get_html_from(url)
+                soup = BeautifulSoup(html_data.data, 'lxml')
+                description_data = soup.select_one('#detailSynopsis > dd')
+                cast_data = soup.select_one(
+                    '#detailCast > dd > ul:nth-child(1)')
+                official_url = soup.select_one('#detailLink > dd > ul > li > a')
+                maker = soup.select_one(
+                    '#main > div:nth-child(1) > div.articleInner > div > div > div.animeDetailBox.clearfix > div.animeDetailL > dl:nth-child(4) > dd > ul > li')
+                staff = soup.select_one('#detailStaff > dd')
+                img_data = soup.select_one(
+                    '#main > div:nth-child(1) > div.articleInner > div > div > div.animeDetailBox.clearfix > div.animeDetailImg > img')
+                print(content.text)
+                screen_name = self.get_screen_name_from(official_url.text)
+                print(screen_name)
+                if description_data:
+                    content_dict['description'] = description_data.text
+                if cast_data:
+                    cast = [person.text for person in cast_data.find_all('li')]
+                    content_dict['cast'] = cast
+                content_dict['official_url'] = official_url.text
+                if maker:
+                    content_dict['maker'] = maker.text
+                if staff:
+                    staff_list = [item.text for item in staff.find_all('li')]
+                    content_dict['staff'] = staff_list
+                if img_data:
+                    content_dict['img'] = img_data['src']
+                if screen_name:
+                    content_dict['screen_name'] = screen_name
+
+                self.contents_data.append(content_dict)
+                time.sleep(1)
+        return self.contents_data
+
+    # TODO (sumitani) 除外する文言を追加する
+    def get_screen_name_from(self, url):
+        response = self.get_html_from(url)
+        soup = BeautifulSoup(response.data, 'lxml')
+        pattern = r'href="https://twitter.com/(\w+)(\?\w+=\w+)?"'
+        repatter = re.compile(pattern)
+        extract_a_tag_list = repatter.findall(str(soup))
+        print(extract_a_tag_list)
+        if extract_a_tag_list:
+            screen_name = Counter(extract_a_tag_list).most_common()[0][0][0]
+        else:
+            screen_name = None
+        time.sleep(1)
+        return screen_name

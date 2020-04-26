@@ -65,3 +65,6 @@ class CategoryAdmin(admin.ModelAdmin):
                 [content.name for content in obj.content_set.all()])
         else:
             return '該当なし'
+
+
+

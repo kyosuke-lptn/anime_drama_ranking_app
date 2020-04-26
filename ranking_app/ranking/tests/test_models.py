@@ -136,3 +136,8 @@ class TwitterApiModelTests(TestCase):
         updated_tweet_count = updated_twitter_user.tweet_set.all().count()
         self.assertNotEqual(twitter_user.name, updated_twitter_user.name)
         self.assertGreater(updated_tweet_count, 1)
+
+
+class WebScrapingModelTests(TestCase):
+
+    def
