@@ -1,11 +1,12 @@
 .header
   .header__title
-    %img(src = "/static/ranking/images/ninja-sample.png")
+    %a{href: '/'}
+      %img(src = "/static/ranking/images/ninja-sample.png")
   .header__nav
     %ul
-      %li Top
-      /%li Movies
-      %li Animations 
-      %li Dramas
-      /%li Cartoons
-      %li About
+      %li
+        %a{href: '/'} トップ
+      %li
+        %a{href: '/animations'} アニメ 
+      %li
+        %a{href: '/dramas'} ドラマ

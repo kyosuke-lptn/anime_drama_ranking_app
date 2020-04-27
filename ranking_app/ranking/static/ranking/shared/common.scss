@@ -1,5 +1,8 @@
 body {
-  background-color: #FFFFF0	;
-  background-size: cover;
   word-break: normal;
+  background-image: url("/static/ranking/images/texture.jpg");
+  background-blend-mode: lighten;
+  background-color: rgba(255, 255, 255, 0.199);
+  background-size: cover;
+  background-attachment: fixed;
 }

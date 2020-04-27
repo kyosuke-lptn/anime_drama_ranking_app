@@ -1,63 +1,100 @@
 - extends "ranking/layouts/base.html.haml"
 
 - block main
-  .container__image
-    %p Twitterの情報から、ランキング形式で注目の作品を紹介します。
-    %img(src = "/static/ranking/images/top-sample1.jpg")
-  .container__info
-    %section
-      %p.container__info__ani Animations
-      %br
-        .container__info__box 1位
-          %br
-          %img(src = "static/ranking/images/ani-sample1.jpg")
-          %br
-          %a タイトル
-        .container__info__box 2位
-          %br
-          %img(src = "static/ranking/images/ani-sample2.jpg")
-          %br
-          %a タイトル
-        .container__info__box 3位
-          %br
-          %img(src = "static/ranking/images/ani-sample3.jpg")
-          %br
-          %a タイトル
-        .container__info__box 4位
-          %br
-          %img(src = "static/ranking/images/ani-sample3.jpg")
-          %br
-          %a タイトル
-        .container__info__box 5位
-          %br
-          %img(src = "static/ranking/images/ani-sample3.jpg")
-          %br
-          %a タイトル
-    %section
-      %p.container__info__dra Dramas
-      %br
-        .container__info__box 1位
-          %br
-          %img(src = "static/ranking/images/dra-sample1.jpg")
-          %br
-          %a hagehageと愉快仲間たち in the sea
-        .container__info__box 2位
-          %br
-          %img(src = "static/ranking/images/dra-sample2.jpg")
-          %br
-          %a タイトル
-        .container__info__box 3位
-          %br
-          %img(src = "static/ranking/images/dra-sample3.jpg")
-          %br
-          %a タイトル
-        .container__info__box 4位
-          %br
-          %img(src = "static/ranking/images/dra-sample3.jpg")
-          %br
-          %a タイトル
-        .container__info__box 5位
-          %br
-          %img(src = "static/ranking/images/dra-sample3.jpg")
-          %br
-          %a タイトル
+  .container__back
+    .container__image
+      %p.saisho 日本の心を
+      %p.ato あなたの生活に
+    .container__info
+      %section.ani
+        %p.container__info__ani
+          %a.topic1{href: '/animations'} アニメ
+          .container__info__box 1位
+            %br
+            %a{href: '/detail'}
+              %img(src = "static/ranking/images/ani-sample1.jpg")
+            %br
+            %a.ani{href: '/detail'}
+              %p hagehageの誕生日　おおお
+          .container__info__box 2位
+            %br
+            %a{href: '/detail'}
+              %img(src = "static/ranking/images/ani-sample2.jpg")
+            %br
+            %a.ani{href: '/detail'}
+              %p タイトル
+          .container__info__box 3位
+            %br
+            %a{href: '/detail'}
+              %img(src = "static/ranking/images/ani-sample3.jpg")
+            %br
+            %a.ani{href: '/detail'}
+              %p タイトル
+          .container__info__box 4位
+            %br
+            %a{href: '/detail'}
+              %img(src = "static/ranking/images/ani-sample3.jpg")
+            %br
+            %a.ani{href: '/detail'}
+              %p タイトル
+          .container__info__box 5位
+            %br
+            %a{href: '/detail'}
+              %img(src = "static/ranking/images/ani-sample3.jpg")
+            %br
+            %a.ani{href: '/detail'}
+              %p タイトル
+      %section.dra
+        %p.container__info__dra
+          %a.topic2{href: '/dramas'} ドラマ
+          .container__info__box 1位
+            %br
+            %a{href: '/detail'}
+              %img(src = "static/ranking/images/dra-sample1.jpg")
+            %br
+            %a.dra{href: '/detail'}
+              %p.dra hagehageと愉快な仲間たち 2nd Season
+          .container__info__box 2位
+            %br
+            %a{href: '/detail'}
+              %img(src = "static/ranking/images/dra-sample2.jpg")
+            %br
+            %a.dra{href: '/detail'}
+              %p.dra タイトル
+          .container__info__box 3位
+            %br
+            %a{href: '/detail'}
+              %img(src = "static/ranking/images/dra-sample3.jpg")
+            %br
+            %a.dra{href: '/detail'}
+              %p.dra タイトル
+          .container__info__box 4位
+            %br
+            %a{href: '/detail'}
+              %img(src = "static/ranking/images/dra-sample3.jpg")
+            %br
+            %a.dra{href: '/detail'}
+              %p.dra タイトル
+          .container__info__box 5位
+            %br
+            %a{href: '/detail'}
+              %img(src = "static/ranking/images/dra-sample3.jpg")
+            %br
+            %a.dra{href: '/detail'}
+              %p.dra タイトル
+      %section.about
+        %p.container__info__about このサイトについて
+          %dd アニメ及びドラマの公式ツイッターから取得した情報を総合的に評価し、ランキング形式で紹介しています。
+            %br 
+            取得データは下記となります。
+            %ul
+              %li フォロー数
+              %li フォロワー数
+              %li ツイート数
+              %li 平均いいね数
+              %br
+              %li 平均リツイート数
+              %li アイコン及びバナーの画像
+              %li ツイート内容
+          %dd 各作品の詳細ページにて、当該作品の基本情報と併せて、所得した情報をもとにグラフを作成し、掲載しております。
+        

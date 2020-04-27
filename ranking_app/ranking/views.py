@@ -11,10 +11,14 @@ def index(request):
     template = loader.get_template('ranking/index.html.haml')
     return HttpResponse(template.render())
 
-def show(request):
-    template = loader.get_template('ranking/detail.html.haml')
+def animation(request):
+    template = loader.get_template('ranking/animations.html.haml')
     return HttpResponse(template.render())
 
-def show1(request):
-    template = loader.get_template('ranking/category.html.haml')
+def drama(request):
+    template = loader.get_template('ranking/dramas.html.haml')
+    return HttpResponse(template.render())
+
+def show(request):
+    template = loader.get_template('ranking/detail.html.haml')
     return HttpResponse(template.render())
