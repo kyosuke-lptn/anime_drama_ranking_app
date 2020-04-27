@@ -43,7 +43,7 @@
       width: 100%;
       height: auto;
       display: inline-block;
-      margin-top: 20px;
+      margin: 10px 0;
       .total {
         float: left;
         width: 50%;
@@ -59,7 +59,7 @@
       }
     }
     &__synopsis {
-      margin-top: 25px;
+      margin: 10px 0;
       p {
         margin-top: 10px;
       }
@@ -68,7 +68,7 @@
       width: 100%;
       height: auto;
       display: inline-block;
-      margin-top: 25px;
+      margin: 10px 0;
       &__cast {
         float: left;
         width: 50%;
@@ -80,27 +80,21 @@
           }
         }
       }
-      &__co {
+      &__behind {
         width: 50%;
         float: right;
-        &__production {
-          height: 50%;
-        }
-        &__behind {
-          margin-top: 10px;
-          height: 50%;
-        }
+        height: 100%;
       }
     }
     &__data {
       width: 100%;
       height: auto;
       display: inline-block;
-      margin-top: 25px;
-      &__music {
+      margin: 10px 0;
+      &__production {
         float: left;
         width: 50%;
-        height: 100%;
+        height: 50%;
       }
       &__date {
         float: right;
@@ -112,7 +106,7 @@
       width: 100%;
       height: auto;
       display: inline-block;
-      margin: 25px 0 20px 0;
+      margin: 10px 0 20px 0;
       &__web {
         float: left;
         width: 50%;
