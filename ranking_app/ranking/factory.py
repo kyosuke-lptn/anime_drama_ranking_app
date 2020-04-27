@@ -31,6 +31,19 @@ class ContentFactory(factory.django.DjangoModelFactory):
     category = factory.SubFactory(CategoryFactory)
 
 
+TRUE_OR_FALSE = [True, False]
+
+
+class StaffFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.Staff
+
+    name = factory.Faker('name', locale='ja')
+    role = factory.Faker('job', locale='ja')
+    is_cast = random.choice(TRUE_OR_FALSE)
+    content = factory.SubFactory(ContentFactory)
+
+
 class TwitterUserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.TwitterUser

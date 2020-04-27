@@ -1,6 +1,6 @@
 from django.contrib import admin
 #
-from .models import Content, Category, TwitterUser, TwitterApi
+from .models import Content, Category, TwitterUser, TwitterApi, Staff
 
 # Register your models here.
 
@@ -13,18 +13,23 @@ class TwitterUserInline(admin.StackedInline):
                        'create_date', 'update_date')
 
 
+class StaffInline(admin.StackedInline):
+    model = Staff
+    extra = 0
+
+
 @admin.register(Content)
 class ContentAdmin(admin.ModelAdmin):
     list_display = ('name', 'update_date', 'twitteruser', 'get_tw_user_data')
     fieldsets = [
         (None, {'fields': ['name', 'screen_name', 'description',
-                           ('maker', 'release_date', 'update_date')]}),
+                           ('maker', 'img_url'), ('release_date', 'update_date')]}),
         ('カテゴリー', {'fields': ['category']}),
         ('最新ツイート', {'fields': ['latest_tweet_text', 'latest_tweet_date',
                                'latest_tweet_create_date']})]
     readonly_fields = ('update_date', 'latest_tweet_text', 'latest_tweet_date',
                        'latest_tweet_create_date')
-    inlines = [TwitterUserInline]
+    inlines = [StaffInline, TwitterUserInline]
 
     def get_tw_user_data(self, obj):
         user = obj.twitteruser

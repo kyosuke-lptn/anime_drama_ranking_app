@@ -57,6 +57,12 @@ class Staff(models.Model):
     content = models.ForeignKey(Content, on_delete=models.CASCADE,
                                 verbose_name='作品', db_index=True)
 
+    class Meta:
+        unique_together = ('name', 'role', 'content')
+
+    def __str__(self):
+        return self.name
+
 
 class TwitterUser(models.Model):
     name = models.CharField(max_length=50, db_index=True)
@@ -351,12 +357,11 @@ class ScrapingContent(object):
 
     # TODO 保存する。　ー　(4) official_urlをどうやって使うか？sc_nameを拾えなかったものをどうする？
     # TODO (3) 取得できなかった情報について、release_dateについて
-    # TODO (2) テストをかく
+    @transaction.atomic
     def store_contents_data(self, category):
         """
         引数のデータをcontentモデル・staffモデルとして保存する。
         :param category: obj
-        :return:
         """
         for content_data in self.contents_data:
             fields_list = ['name', 'description', 'maker', 'screen_name',

@@ -62,6 +62,15 @@ class CategoryModelTests(TestCase):
             factory.CategoryFactory(name=name)
 
 
+class StaffModelTests(TestCase):
+
+    def test_unique_fields(self):
+        staff = factory.StaffFactory(name='tanaka', role='主人公', is_cast=True)
+        with self.assertRaises(IntegrityError):
+            factory.StaffFactory(name='tanaka', role='主人公', is_cast=True,
+                                 content=staff.content)
+
+
 class TwitterUserModelTests(TestCase):
 
     def setUp(self):
