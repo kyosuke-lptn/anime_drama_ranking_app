@@ -1,0 +1,16 @@
+!!! 5
+%html{ lang: 'ja' }
+  %head
+    %meta{ charset: 'utf-8' }
+    %title ハゲハゲ
+    - load sass_tags
+    %link{ rel: 'stylesheet', type: 'text/css', href: "{% sass_src 'ranking/shared/style.scss' %}" }
+    %link{ href: "https://fonts.googleapis.com/css?family=Sawarabi+Mincho", rel: "stylesheet"}
+    %link{ href: "https://fonts.googleapis.com/earlyaccess/hannari.css", rel: "stylesheet"}
+  %body
+    - include 'ranking/layouts/_header.html.haml'
+
+    .container
+      - block main
+
+    - include 'ranking/layouts/_footer.html.haml'

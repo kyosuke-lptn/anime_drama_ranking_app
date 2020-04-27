@@ -1,0 +1,122 @@
+.movies__detail {
+  position: relative;
+  width: 60%;
+  height: auto;
+  margin: 0 auto;
+  font-family: 'Yu Mincho Light','YuMincho','Yu Mincho','游明朝体';
+  color: #FFFFF0;
+  padding: 10px 20px;
+  .detail__head {
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.500);
+    h1 {
+      font-size: 30px;
+    }
+  }
+  .detail__head__table {
+    padding: 20px 0 10px 0;
+    height: 100%;
+    width: 100%;
+    display: inline-block;
+    &__media {
+      float: left;
+    }
+    &__graph {
+      float: right;
+    }
+    img {
+      height: 300px;
+      width: auto;
+      padding: 0 15px 0 15px ;
+      text-align: center;
+    }
+  }
+  .detail__body {
+    background-color: rgba(0, 0, 0, 0.500);
+    margin-top: 10px;
+    padding: 0 20px;
+    .subtitle {
+      font-size: 25px;
+      margin-bottom: 10px;
+    }
+    &__info {
+      width: 100%;
+      height: auto;
+      display: inline-block;
+      margin: 10px 0;
+      .total {
+        float: left;
+        width: 50%;
+        height: 100%;
+      }
+      .ave {
+        float: right;
+        width: 50%;
+        height: 100%;
+      }
+      li {
+        margin-top: 5px;
+      }
+    }
+    &__synopsis {
+      margin: 10px 0;
+      p {
+        margin-top: 10px;
+      }
+    }
+    &__staff {
+      width: 100%;
+      height: auto;
+      display: inline-block;
+      margin: 10px 0;
+      &__cast {
+        float: left;
+        width: 50%;
+        height: 100%;
+        ul {
+          margin-top: 10px;
+          li {
+            margin-top: 5px;
+          }
+        }
+      }
+      &__behind {
+        width: 50%;
+        float: right;
+        height: 100%;
+      }
+    }
+    &__data {
+      width: 100%;
+      height: auto;
+      display: inline-block;
+      margin: 10px 0;
+      &__production {
+        float: left;
+        width: 50%;
+        height: 50%;
+      }
+      &__date {
+        float: right;
+        width: 50%;
+        height: 100%;
+      }
+    }
+    &__official {
+      width: 100%;
+      height: auto;
+      display: inline-block;
+      margin: 10px 0 20px 0;
+      &__web {
+        float: left;
+        width: 50%;
+        height: 100%;
+      }
+      &__twitter {
+        float: right;
+        width: 50%;
+        height: 100%;
+      }
+    }
+  }
+}

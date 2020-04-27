@@ -1,0 +1,12 @@
+.footer {
+  text-align: center;
+  color: #FFFFF0;
+  padding: 8px 0 8px 30px;
+  opacity: 0.8;
+  height: 15px;
+  &__small {
+    font-size: 12px;
+    font-family: "Sawarabi Mincho";
+    height: 15px;
+  }
+}

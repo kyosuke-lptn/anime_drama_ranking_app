@@ -10,3 +10,15 @@ from .models import Content
 def index(request):
     template = loader.get_template('ranking/index.html.haml')
     return HttpResponse(template.render())
+
+def animation(request):
+    template = loader.get_template('ranking/animations.html.haml')
+    return HttpResponse(template.render())
+
+def drama(request):
+    template = loader.get_template('ranking/dramas.html.haml')
+    return HttpResponse(template.render())
+
+def show(request):
+    template = loader.get_template('ranking/detail.html.haml')
+    return HttpResponse(template.render())
