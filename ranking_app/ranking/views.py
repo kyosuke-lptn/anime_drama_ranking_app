@@ -10,3 +10,11 @@ from .models import Content
 def index(request):
     template = loader.get_template('ranking/index.html.haml')
     return HttpResponse(template.render())
+
+def show(request):
+    template = loader.get_template('ranking/detail.html.haml')
+    return HttpResponse(template.render())
+
+def show1(request):
+    template = loader.get_template('ranking/category.html.haml')
+    return HttpResponse(template.render())

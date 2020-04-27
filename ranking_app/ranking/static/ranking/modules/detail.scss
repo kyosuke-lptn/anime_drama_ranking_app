@@ -1,0 +1,45 @@
+.movies__detail {
+  width: 60%;
+  margin: 0 auto;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  section {
+    h1 {
+      font-size: 30px;
+      font-weight: bolder;
+    }
+  }
+  .detail__head__table {
+    padding-top: 20px;
+    height: 300px;
+    width: 850px;
+    display: inline-block;
+    img {
+      height: 300px;
+      width: auto;
+      float: left;
+      padding: 0 15px 0 15px ;
+    }
+  }
+  .detail__body {
+    padding-top: 20px;
+    .subtitle {
+      font-size: 25px;
+      font-weight: bolder;
+    }
+    &__synopsis {
+      margin-top: 20px;
+      p {
+        margin-top: 10px;
+      }
+    }
+    &__cast {
+      margin-top: 20px;
+      ul {
+        margin-top: 10px;
+        li {
+          margin-top: 5px;
+        }
+      }
+    }
+  }
+}
