@@ -63,8 +63,15 @@ class TweetFactory(factory.django.DjangoModelFactory):
 
     tweet_id = '1'
     text = factory.Faker('sentence', nb_words=12, locale='ja')
-    retweet_count = random.randrange(1000)
-    favorite_count = random.randrange(1000)
     tweet_date = factory.Faker('date_time_ad', tzinfo=JA_TZ,
                                start_datetime=START_TIME)
     twitter_user = factory.SubFactory(TwitterUserFactory)
+
+
+class TweetCountFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.TweetCount
+
+    tweet = factory.SubFactory(TweetFactory)
+    retweet_count = random.randrange(0, 500)
+    favorite_count = random.randrange(0, 500)

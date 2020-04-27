@@ -103,8 +103,8 @@ class TwitterUser(models.Model):
         tweets = self.tweet_set.all()
         self.all_tweet_count = tweets.count()
         for tweet in tweets:
-            self.all_retweet_count += tweet.retweet_count
-            self.all_favorite_count += tweet.favorite_count
+            self.all_retweet_count += tweet.retweet_count()
+            self.all_favorite_count += tweet.favorite_count()
         self.save()
 
     def latest_tweet(self):
@@ -114,13 +114,26 @@ class TwitterUser(models.Model):
 class Tweet(models.Model):
     tweet_id = models.CharField('ツイートID', unique=True, max_length=100)
     text = models.TextField('内容')
-    retweet_count = models.PositiveIntegerField('リツート数')
-    favorite_count = models.PositiveIntegerField('いいね数')
     twitter_user = models.ForeignKey(TwitterUser, on_delete=models.CASCADE,
                                      verbose_name='Twitterデータ')
     tweet_date = models.DateTimeField('ツイート日')
+
+    def latest_tweet_count(self):
+        return self.tweetcount_set.order_by('-create_date')[0]
+
+    def retweet_count(self):
+        return self.latest_tweet_count().retweet_count
+
+    def favorite_count(self):
+        return self.latest_tweet_count().favorite_count
+
+
+class TweetCount(models.Model):
+    tweet = models.ForeignKey(Tweet, on_delete=models.CASCADE,
+                              verbose_name='ツイート')
+    retweet_count = models.PositiveIntegerField('リツート数')
+    favorite_count = models.PositiveIntegerField('いいね数')
     create_date = models.DateTimeField('ツイート取得日', auto_now_add=True)
-    update_date = models.DateTimeField('ツイート取得更新日', auto_now=True)
 
 
 TIMELINE_COUNT = '200'
@@ -215,18 +228,16 @@ class TwitterApi(object):
         :param twitter_user: obj
         """
         if timeline_data:
-            retweet_count, favorite_count = 0, 0
             for tweet in timeline_data:
-                retweet_count += tweet['retweet_count']
-                favorite_count += tweet['favorite_count']
                 tweet_time = tweet['created_at']
                 converted_time = datetime.strptime(
                     tweet_time, '%a %b %d %H:%M:%S %z %Y')
-                Tweet.objects.create(
+                new_tweet = Tweet.objects.create(
                     twitter_user=twitter_user, tweet_id=tweet['id_str'],
-                    tweet_date=converted_time, text=tweet['text'],
-                    retweet_count=tweet['retweet_count'],
-                    favorite_count=tweet['favorite_count'])
+                    tweet_date=converted_time, text=tweet['text'])
+                TweetCount.objects.create(tweet=new_tweet,
+                                          retweet_count=tweet['retweet_count'],
+                                          favorite_count=tweet['favorite_count'])
             twitter_user.loads_tweet()
 
     @transaction.atomic
@@ -242,20 +253,12 @@ class TwitterApi(object):
             twitter_user = self.store_user(screen_name, user_data)
             self.store_timeline_data(timeline_data, twitter_user)
 
-    @transaction.atomic
-    def update_data(self, content):
-        """
-        TwitterAPIからのデータを取得して、TwitterUserとTweetのモデルをアップデートする
-        :param content: obj
-        """
-        # 最新の取得済みツイートを持ってくる（id）
-        screen_name = content.screen_name
-        twitter_user = content.twitteruser
+    # TODO 変更する。
+    # def get_updated_timeline(self, screen_name, twitter_user, start_datetime):
+    def get_updated_timeline(self, screen_name, twitter_user):
         latest_tweet = twitter_user.tweet_set.order_by('-tweet_date')[0]
         next_id = int(latest_tweet.tweet_id)
 
-        # ツイートを取得する
-        user_data = self.get_user(screen_name)
         timeline = []
         while True:
             result = self.get_simple_timeline(screen_name, since_id=next_id)
@@ -264,7 +267,18 @@ class TwitterApi(object):
                 next_id = result[0]['id']
             else:
                 break
-        # ツイートを保存する
+        return timeline
+
+    @transaction.atomic
+    def update_data(self, content):
+        """
+        TwitterAPIからのデータを取得して、TwitterUserとTweetのモデルをアップデートする
+        :param content: obj
+        """
+        screen_name = content.screen_name
+        twitter_user = content.twitteruser
+        timeline = self.get_updated_timeline(screen_name, twitter_user)
+        user_data = self.get_user(screen_name)
         updated_twitter_user = self.store_user(screen_name, user_data, content)
         self.store_timeline_data(timeline, updated_twitter_user)
 

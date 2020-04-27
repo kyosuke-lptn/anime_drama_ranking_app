@@ -59,8 +59,9 @@ class ContentAdmin(admin.ModelAdmin):
     latest_tweet_text.short_description = '最新のツイート内容'
 
     def latest_tweet_create_date(self, obj):
-        return obj.twitteruser.latest_tweet().create_date.strftime(
-            '%Y年%m月%d日%H:%M')
+        create_datetime = obj.twitteruser.latest_tweet().\
+            latest_tweet_count().create_date
+        return create_datetime.strftime('%Y年%m月%d日%H:%M')
 
     latest_tweet_create_date.short_description = '以前データ取得した日'
 

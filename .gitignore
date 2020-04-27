@@ -4,7 +4,7 @@
 ranking_app/static/ranking/*
 
 # mysql env
-.env_sample
+mysql/.env_sample
 
 # 環境変数
 .env

@@ -11,6 +11,24 @@ def support_datetime_default(obj):
     raise TypeError(repr(obj) + " is not JSON serializable")
 
 
+def create_tweets(limit_id):
+    response_data = []
+    ja_tz = timezone('Asia/Tokyo')
+    start_time = datetime(2000, 1, 1, tzinfo=ja_tz)
+    for tweet_id in range(limit_id, limit_id + 50):
+        time = fake.date_time_ad(tzinfo=ja_tz, start_datetime=start_time)
+        convert_time = time.strftime('%a %b %d %H:%M:%S %z %Y')
+        response_data.append({
+            'id': tweet_id, 'text': fake.text(),
+            'id_str': str(tweet_id),
+            'created_at': convert_time,
+            'retweet_count': random.randrange(500),
+            'favorite_count': random.randrange(500)})
+    if response_data[-1]['id'] > 100:
+        response_data = []
+    return response_data
+
+
 fake = Faker('ja_JP')
 
 
@@ -22,10 +40,8 @@ def response_data_mock(url, query):
         response_data = {'name': fake.name(), 'url': fake.url(),
                          'description': fake.text(),
                          'followers_count': random.randrange(500)}
+        return response_data
     elif url == "https://api.twitter.com/1.1/statuses/user_timeline.json":
-        ja_tz = timezone('Asia/Tokyo')
-        start_time = datetime(2000, 1, 1, tzinfo=ja_tz)
-        response_data = []
         if 'max_id' in query:
             max_id = query['max_id']
             max_id += 2
@@ -34,16 +50,11 @@ def response_data_mock(url, query):
         if 'since_id' in query:
             max_id = query['since_id']
             max_id += 49
-        for tweet_id in range(max_id, max_id + 50):
-            time = fake.date_time_ad(tzinfo=ja_tz, start_datetime=start_time)
-            convert_time = time.strftime('%a %b %d %H:%M:%S %z %Y')
-            response_data.append({
-                'id': tweet_id, 'text': fake.text(),
-                'id_str': str(tweet_id),
-                'created_at': convert_time,
-                'retweet_count': random.randrange(500),
-                'favorite_count': random.randrange(500)})
-        if response_data[-1]['id'] > 100:
-            response_data = []
-    return response_data
+        response_data = create_tweets(max_id)
+        return response_data
+
+
+# def response_updated_mock(url, query):
+#     if url == "https://api.twitter.com/1.1/statuses/user_timeline.json":
+
 

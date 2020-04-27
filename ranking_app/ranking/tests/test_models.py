@@ -90,9 +90,10 @@ class TwitterUserModelTests(TestCase):
         twitter_userにツイートの情報を反映するためにはloads_tweetメソッドが必要。
         """
         for num in range(10):
-            factory.TweetFactory(tweet_id=str(num), retweet_count=10,
-                                 favorite_count=5,
-                                 twitter_user=self.twitter_user)
+            tweet = factory.TweetFactory(tweet_id=str(num),
+                                         twitter_user=self.twitter_user)
+            factory.TweetCountFactory(tweet=tweet, retweet_count=10,
+                                      favorite_count=5)
         self.assertEqual(self.twitter_user.retweets_avg(), 0)
         self.twitter_user.loads_tweet()
         self.assertEqual(self.twitter_user.retweets_avg(), 10)
@@ -102,9 +103,10 @@ class TwitterUserModelTests(TestCase):
         twitter_userにツイートの情報を反映するためにはloads_tweetメソッドが必要。
         """
         for num in range(10):
-            factory.TweetFactory(tweet_id=str(num), retweet_count=10,
-                                 favorite_count=5,
-                                 twitter_user=self.twitter_user)
+            tweet = factory.TweetFactory(tweet_id=str(num),
+                                         twitter_user=self.twitter_user)
+            factory.TweetCountFactory(tweet=tweet, retweet_count=10,
+                                      favorite_count=5)
         self.assertEqual(self.twitter_user.favorite_avg(), 0)
         self.twitter_user.loads_tweet()
         self.assertEqual(self.twitter_user.favorite_avg(), 5)
@@ -119,26 +121,29 @@ class TwitterUserModelTests(TestCase):
 class TwitterApiModelTests(TestCase):
 
     def setUp(self):
-        self.timeline_patcher = mock.patch('ranking.models.TwitterApi.get_base')
-        self.mock_get_base = self.timeline_patcher.start()
         self.screen_name = 'sample_screen_name'
         self.content = factory.ContentFactory(screen_name=self.screen_name)
-        self.mock_get_base.side_effect = response_data_mock
 
-    def tearDown(self):
-        self.timeline_patcher.stop()
+    @mock.patch('ranking.models.TwitterApi.get_base')
+    def test_get_user(self, mock_get_base):
+        mock_get_base.side_effect = response_data_mock
 
-    def test_get_user(self):
         TwitterApi().get_user('test_screen_name')
 
-        self.mock_get_base.assert_called_once()
+        mock_get_base.assert_called_once()
 
-    def test_get_most_timeline_call_three_times(self):
+    @mock.patch('ranking.models.TwitterApi.get_base')
+    def test_get_most_timeline_call_three_times(self, mock_get_base):
+        mock_get_base.side_effect = response_data_mock
+
         TwitterApi().get_most_timeline('test name')
 
-        self.assertEqual(self.mock_get_base.call_count, 3)
+        self.assertEqual(mock_get_base.call_count, 3)
 
-    def test_get_and_store_twitter_data(self):
+    @mock.patch('ranking.models.TwitterApi.get_base')
+    def test_get_and_store_twitter_data(self, mock_get_base):
+        mock_get_base.side_effect = response_data_mock
+
         TwitterApi().get_and_store_twitter_data(self.content)
 
         twitter_user = Content.objects.get(
@@ -146,17 +151,24 @@ class TwitterApiModelTests(TestCase):
         tweet_count = twitter_user.tweet_set.all().count()
         self.assertEqual(tweet_count, 100)
         self.assertEqual(twitter_user.all_tweet_count, tweet_count)
-        self.assertEqual(self.mock_get_base.call_count, 4)
+        self.assertEqual(mock_get_base.call_count, 4)
         self.assertGreater(twitter_user.all_retweet_count, 0)
         self.assertGreater(twitter_user.all_favorite_count, 0)
 
-    def test_get_and_store_twitter_data_without_screen_name(self):
+    @mock.patch('ranking.models.TwitterApi.get_base')
+    def test_get_and_store_twitter_data_without_screen_name(self,
+                                                            mock_get_base):
+        mock_get_base.side_effect = response_data_mock
+
         content = factory.ContentFactory(screen_name=None)
         TwitterApi().get_and_store_twitter_data(content)
 
-        self.mock_get_base.assert_not_called()
+        mock_get_base.assert_not_called()
 
-    def test_get_and_store_twitter_data_without_image_url(self):
+    @mock.patch('ranking.models.TwitterApi.get_base')
+    def test_get_and_store_twitter_data_without_image_url(self, mock_get_base):
+        mock_get_base.side_effect = response_data_mock
+
         TwitterApi().get_and_store_twitter_data(self.content)
 
         twitter_user = Content.objects.get(
@@ -164,11 +176,15 @@ class TwitterApiModelTests(TestCase):
         self.assertIsNone(twitter_user.icon_url, None)
         self.assertIsNone(twitter_user.banner_url, None)
 
-    def test_update_twitter_data(self):
+    @mock.patch('ranking.models.TwitterApi.get_base')
+    def test_update_twitter_data(self, mock_get_base):
+        mock_get_base.side_effect = response_data_mock
+
         twitter_user = factory.TwitterUserFactory(content=self.content)
+        tweet = factory.TweetFactory(twitter_user=twitter_user, tweet_id='1')
+        factory.TweetCountFactory(tweet=tweet, retweet_count=10,
+                                  favorite_count=10)
         twitter_user.loads_tweet()
-        factory.TweetFactory(twitter_user=twitter_user, tweet_id='1',
-                             retweet_count=10, favorite_count=10)
 
         TwitterApi().update_data(self.content)
 
