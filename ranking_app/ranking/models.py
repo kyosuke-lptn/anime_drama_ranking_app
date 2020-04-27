@@ -75,40 +75,37 @@ class TwitterUser(models.Model):
                                 blank=True)
     banner_url = models.CharField('バナー画像のURL', max_length=500, null=True,
                                   blank=True)
-    followers_count = models.PositiveIntegerField('フォワー数', null=True,
-                                                  blank=True)
+    followers_count = models.PositiveIntegerField('フォワー数', default=0)
+    all_tweet_count = models.PositiveIntegerField('ツイート総数', default=0)
+    all_retweet_count = models.PositiveIntegerField('リツイート総数', default=0)
+    all_favorite_count = models.PositiveIntegerField('いいね総数', default=0)
     create_date = models.DateTimeField('作成日', auto_now_add=True)
     update_date = models.DateTimeField('更新日', auto_now=True)
 
     def __str__(self):
         return self.name
 
-    def all_tweet_count(self):
-        return self.tweet_set.all().count()
-
-    def all_retweet_count(self):
-        count = 0
-        for tweet in self.tweet_set.all():
-            count += tweet.retweet_count
-        return count
-
-    def all_favorite_count(self):
-        count = 0
-        for tweet in self.tweet_set.all():
-            count += tweet.favorite_count
-        return count
-
     def retweets_avg(self):
-        if self.all_retweet_count() == 0 or self.all_retweet_count() == 0:
+        if self.all_retweet_count == 0 or self.all_retweet_count == 0:
             return 0
-        result = self.all_retweet_count() / self.all_tweet_count()
+        result = self.all_retweet_count / self.all_tweet_count
         return round(result, 2)
 
     def favorite_avg(self):
-        if self.all_favorite_count() == 0 or self.all_retweet_count() == 0:
+        if self.all_favorite_count == 0 or self.all_retweet_count == 0:
             return 0
-        result = self.all_favorite_count() / self.all_tweet_count()
+        result = self.all_favorite_count / self.all_tweet_count
         return round(result, 2)
+
+    def loads_tweet(self):
+        self.all_favorite_count = 0
+        self.all_retweet_count = 0
+        tweets = self.tweet_set.all()
+        self.all_tweet_count = tweets.count()
+        for tweet in tweets:
+            self.all_retweet_count += tweet.retweet_count
+            self.all_favorite_count += tweet.favorite_count
+        self.save()
 
     def latest_tweet(self):
         return self.tweet_set.order_by('-tweet_date')[0]
@@ -230,18 +227,20 @@ class TwitterApi(object):
                     tweet_date=converted_time, text=tweet['text'],
                     retweet_count=tweet['retweet_count'],
                     favorite_count=tweet['favorite_count'])
+            twitter_user.loads_tweet()
 
     @transaction.atomic
     def get_and_store_twitter_data(self, content):
         """
-        TwitterAPIからデータを取得して,TwitterUserとTweetのモデルを作る
+        TwitterAPIからデータを取得して,TwitterUserとTweetのモデルを新規作成する
         :param content: obj
         """
         screen_name = content.screen_name
-        user_data = self.get_user(screen_name)
-        timeline_data = self.get_most_timeline(screen_name)
-        twitter_user = self.store_user(screen_name, user_data)
-        self.store_timeline_data(timeline_data, twitter_user)
+        if screen_name:
+            user_data = self.get_user(screen_name)
+            timeline_data = self.get_most_timeline(screen_name)
+            twitter_user = self.store_user(screen_name, user_data)
+            self.store_timeline_data(timeline_data, twitter_user)
 
     @transaction.atomic
     def update_data(self, content):
@@ -277,6 +276,9 @@ EXCLUSION_LIST = ['share', 'bs7ch_pr', 'tvtokyo_pr', 'intent', 'search']
 class ScrapingContent(object):
     def __init__(self):
         self.contents_data = []
+        self.contents = []
+        self.default_data_list = ['name', 'description', 'cast', 'official_url',
+                                  'maker', 'staff', 'img_url', 'screen_name']
 
     def create_url(self, url='', anime_default=False):
         if anime_default:
@@ -312,7 +314,7 @@ class ScrapingContent(object):
                     '#detailCast > dd > ul:nth-child(1)')
                 official_url = soup.select_one('#detailLink > dd > ul > li > a')
                 maker = soup.select_one(
-                    '#main > div:nth-child(1) > div.articleInner > div > div > div.animeDetailBox.clearfix > div.animeDetailL > dl:nth-child(4) > dd > ul > li')
+                    '#main > div:nth-child(1) > div.articleInner > div > div > div.animeDetailBox.clearfix > div.animeDetailL > dl:nth-child(3) > dd > ul > li')
                 staff = soup.select_one('#detailStaff > dd')
                 img_data = soup.select_one(
                     '#main > div:nth-child(1) > div.articleInner > div > div > div.animeDetailBox.clearfix > div.animeDetailImg > img')
@@ -348,11 +350,12 @@ class ScrapingContent(object):
             extract_a_tag_list = [
                 repatter.match(attr['href']).groups()[0].lower() for attr in
                 a_tag_list]
-            for word in EXCLUSION_LIST:
-                if word in extract_a_tag_list:
-                    extract_a_tag_list.remove(word)
-            if extract_a_tag_list:
-                screen_name = Counter(extract_a_tag_list).most_common()[0][0]
+            correct_a_tag = []
+            for word in extract_a_tag_list:
+                if word not in EXCLUSION_LIST:
+                    correct_a_tag.append(word)
+            if correct_a_tag:
+                screen_name = Counter(correct_a_tag).most_common()[0][0]
         return screen_name
 
     # TODO 保存する。　ー　(4) official_urlをどうやって使うか？sc_nameを拾えなかったものをどうする？
@@ -371,6 +374,7 @@ class ScrapingContent(object):
                 if attr_key in fields_list:
                     content_args[attr_key] = attr_value
             new_content = Content.objects.create(**content_args)
+            self.contents.append(new_content)
 
             if 'staff' in content_data:
                 role_and_name = [re.split('[【】、]', person)
@@ -391,3 +395,15 @@ class ScrapingContent(object):
                     staff_args = {'role': person[0], 'name': person[1],
                                   'content': new_content, 'is_cast': True}
                     Staff.objects.create(**staff_args)
+
+    def get_anime_data(self):
+        """
+        アニメに関する情報を取得しモデルを新規作成する
+        :return: list 取得したデータ
+        """
+        url = self.create_url('/program', anime_default=True)
+        response = self.get_html_from(url)
+        self.extra_data_from(response)
+        anime_category = Category.objects.get(name='アニメ')
+        self.store_contents_data(anime_category)
+        return self

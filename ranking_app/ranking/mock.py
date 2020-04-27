@@ -15,6 +15,9 @@ fake = Faker('ja_JP')
 
 
 def response_data_mock(url, query):
+    """
+    timelineのデータを取得する場合、新規取得ならtweetを100こ返す。更新ならtweetを50個返す。
+    """
     if url == "https://api.twitter.com/1.1/users/show.json":
         response_data = {'name': fake.name(), 'url': fake.url(),
                          'description': fake.text(),

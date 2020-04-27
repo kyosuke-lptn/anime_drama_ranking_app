@@ -48,6 +48,15 @@ class ContentModelTests(TestCase):
 
         self.assertTrue(content.has_tweets())
 
+    def test_has_tweets_no_twitter_and_only_twitter_user(self):
+        content = factory.ContentFactory()
+
+        self.assertFalse(content.has_tweets())
+
+        factory.TwitterUserFactory(content=content)
+
+        self.assertTrue(content.has_tweets())
+
 
 class CategoryModelTests(TestCase):
 
@@ -77,17 +86,27 @@ class TwitterUserModelTests(TestCase):
         self.twitter_user = factory.TwitterUserFactory()
 
     def test_retweets_avg(self):
+        """
+        twitter_userにツイートの情報を反映するためにはloads_tweetメソッドが必要。
+        """
         for num in range(10):
             factory.TweetFactory(tweet_id=str(num), retweet_count=10,
                                  favorite_count=5,
                                  twitter_user=self.twitter_user)
+        self.assertEqual(self.twitter_user.retweets_avg(), 0)
+        self.twitter_user.loads_tweet()
         self.assertEqual(self.twitter_user.retweets_avg(), 10)
 
     def test_favorite_avg(self):
+        """
+        twitter_userにツイートの情報を反映するためにはloads_tweetメソッドが必要。
+        """
         for num in range(10):
             factory.TweetFactory(tweet_id=str(num), retweet_count=10,
                                  favorite_count=5,
                                  twitter_user=self.twitter_user)
+        self.assertEqual(self.twitter_user.favorite_avg(), 0)
+        self.twitter_user.loads_tweet()
         self.assertEqual(self.twitter_user.favorite_avg(), 5)
 
     def test_favorite_avg_with_0(self):
@@ -126,7 +145,16 @@ class TwitterApiModelTests(TestCase):
             screen_name=self.screen_name).twitteruser
         tweet_count = twitter_user.tweet_set.all().count()
         self.assertEqual(tweet_count, 100)
+        self.assertEqual(twitter_user.all_tweet_count, tweet_count)
         self.assertEqual(self.mock_get_base.call_count, 4)
+        self.assertGreater(twitter_user.all_retweet_count, 0)
+        self.assertGreater(twitter_user.all_favorite_count, 0)
+
+    def test_get_and_store_twitter_data_without_screen_name(self):
+        content = factory.ContentFactory(screen_name=None)
+        TwitterApi().get_and_store_twitter_data(content)
+
+        self.mock_get_base.assert_not_called()
 
     def test_get_and_store_twitter_data_without_image_url(self):
         TwitterApi().get_and_store_twitter_data(self.content)
@@ -138,14 +166,20 @@ class TwitterApiModelTests(TestCase):
 
     def test_update_twitter_data(self):
         twitter_user = factory.TwitterUserFactory(content=self.content)
-        factory.TweetFactory(twitter_user=twitter_user, tweet_id='1')
+        twitter_user.loads_tweet()
+        factory.TweetFactory(twitter_user=twitter_user, tweet_id='1',
+                             retweet_count=10, favorite_count=10)
 
         TwitterApi().update_data(self.content)
 
         updated_twitter_user = TwitterUser.objects.get(pk=twitter_user.pk)
         updated_tweet_count = updated_twitter_user.tweet_set.all().count()
         self.assertNotEqual(twitter_user.name, updated_twitter_user.name)
-        self.assertGreater(updated_tweet_count, 1)
+        self.assertEqual(updated_tweet_count, 51)
+        self.assertEqual(updated_twitter_user.all_tweet_count,
+                         updated_tweet_count)
+        self.assertGreater(updated_twitter_user.all_retweet_count, 10)
+        self.assertGreater(updated_twitter_user.all_favorite_count, 10)
 
 
 class WebScrapingModelTests(TestCase):
@@ -177,8 +211,7 @@ class WebScrapingModelTests(TestCase):
 
     @mock.patch('ranking.models.ScrapingContent.extra_data_from')
     def test_store_contents_data_with_little_data(self, mock_contents_data):
-        little_data = [
-            {'name': 'サンプルドラマ'}]
+        little_data = [{'name': 'サンプルドラマ'}]
         mock_contents_data.return_value = little_data
 
         scraping = ScrapingContent()

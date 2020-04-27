@@ -1,0 +1,37 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+    <h2>自動取得の結果</h2>
+    <h5><a href="/admin/ranking/content/">コンテンツ一覧へ</a></h5>
+    <div>
+        {% for data in contents_data %}
+            {% for item in default_data_list %}
+            <div class="results">
+                <table id="result_list">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="sortable column-name">
+                                <div class="text"><a href="?o=1">項目</a></div>
+                            </th>
+                            <th scope="col" class="column-get_contents">
+                                <div class="text"><span>取得データ</span></div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="row1">
+                            <th class="field-name">{{ item }}</th>
+                            {% if item in data %}
+                                <td class="field-get_contents">{{ data.item }}</td>
+                            {% else %}
+                                <td class="field-get_contents">None</td>
+                            {% endif %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+        {% empty %}
+            <p>何も取得できませんでした。コードの修正が必要です。</p>
+        {% endfor %}
+    </div>
+{% endblock %}
