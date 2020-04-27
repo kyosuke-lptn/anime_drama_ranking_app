@@ -3,85 +3,98 @@
 - block main
   .container__back
     .container__image
-      %p.saisho 週末
-      %p.ato 何して遊ぶ？
-      %img(src = "/static/ranking/images/top-sample1.jpg")
+      %p.saisho 日本の心を
+      %p.ato あなたの生活に
     .container__info
-      %section
+      %section.ani
         %p.container__info__ani
-          %a.topic{href: '/animations'} Animations
-        %br
+          %a.topic1{href: '/animations'} アニメ
           .container__info__box 1位
             %br
             %a{href: '/detail'}
               %img(src = "static/ranking/images/ani-sample1.jpg")
             %br
-            %a{href: '/detail'}
-              %p タイトル
+            %a.ani{href: '/detail'}
+              %p hagehageの誕生日　おおお
           .container__info__box 2位
             %br
             %a{href: '/detail'}
               %img(src = "static/ranking/images/ani-sample2.jpg")
             %br
-            %a{href: '/detail'}
+            %a.ani{href: '/detail'}
               %p タイトル
           .container__info__box 3位
             %br
             %a{href: '/detail'}
               %img(src = "static/ranking/images/ani-sample3.jpg")
             %br
-            %a{href: '/detail'}
+            %a.ani{href: '/detail'}
               %p タイトル
           .container__info__box 4位
             %br
             %a{href: '/detail'}
               %img(src = "static/ranking/images/ani-sample3.jpg")
             %br
-            %a{href: '/detail'}
+            %a.ani{href: '/detail'}
               %p タイトル
           .container__info__box 5位
             %br
             %a{href: '/detail'}
               %img(src = "static/ranking/images/ani-sample3.jpg")
             %br
-            %a{href: '/detail'}
+            %a.ani{href: '/detail'}
               %p タイトル
-      %section
+      %section.dra
         %p.container__info__dra
-          %a.topic{href: '/dramas'} Dramas
-        %br
+          %a.topic2{href: '/dramas'} ドラマ
           .container__info__box 1位
             %br
             %a{href: '/detail'}
               %img(src = "static/ranking/images/dra-sample1.jpg")
             %br
-            %a{href: '/detail'}
-              %p hagehageと愉快仲間たち in the sea
+            %a.dra{href: '/detail'}
+              %p.dra hagehageと愉快な仲間たち 2nd Season
           .container__info__box 2位
             %br
             %a{href: '/detail'}
               %img(src = "static/ranking/images/dra-sample2.jpg")
             %br
-            %a{href: '/detail'}
-              %p タイトル
+            %a.dra{href: '/detail'}
+              %p.dra タイトル
           .container__info__box 3位
             %br
             %a{href: '/detail'}
               %img(src = "static/ranking/images/dra-sample3.jpg")
             %br
-            %a{href: '/detail'}
-              %p タイトル
+            %a.dra{href: '/detail'}
+              %p.dra タイトル
           .container__info__box 4位
             %br
             %a{href: '/detail'}
               %img(src = "static/ranking/images/dra-sample3.jpg")
             %br
-            %a{href: '/detail'}
-              %p タイトル
+            %a.dra{href: '/detail'}
+              %p.dra タイトル
           .container__info__box 5位
             %br
             %a{href: '/detail'}
               %img(src = "static/ranking/images/dra-sample3.jpg")
             %br
-            %a{href: '/detail'}
-              %p タイトル
+            %a.dra{href: '/detail'}
+              %p.dra タイトル
+      %section.about
+        %p.container__info__about このサイトについて
+          %dd アニメ及びドラマの公式ツイッターから取得した情報を総合的に評価し、ランキング形式で紹介しています。
+            %br 
+            取得データは下記となります。
+            %ul
+              %li フォロー数
+              %li フォロワー数
+              %li ツイート数
+              %li 平均いいね数
+              %br
+              %li 平均リツイート数
+              %li アイコン及びバナーの画像
+              %li ツイート内容
+          %dd 各作品の詳細ページにて、当該作品の基本情報と併せて、所得した情報をもとにグラフを作成し、掲載しております。
+        

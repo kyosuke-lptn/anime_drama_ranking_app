@@ -3,32 +3,40 @@
   width: 60%;
   height: auto;
   margin: 0 auto;
-  font-family: 'M PLUS Rounded 1c', sans-serif;
-  section {
-    margin-top: 10px;
+  font-family: 'Yu Mincho Light','YuMincho','Yu Mincho','游明朝体';
+  color: #FFFFF0;
+  padding: 10px 20px;
+  .detail__head {
     height: 100%;
+    background-color: rgba(0, 0, 0, 0.500);
     h1 {
       font-size: 30px;
-      font-weight: bolder;
     }
   }
   .detail__head__table {
-    padding-top: 20px;
-    height: 300px;
-    width: 850px;
+    padding: 20px 0 10px 0;
+    height: 100%;
+    width: 100%;
     display: inline-block;
+    &__media {
+      float: left;
+    }
+    &__graph {
+      float: right;
+    }
     img {
       height: 300px;
       width: auto;
-      float: left;
       padding: 0 15px 0 15px ;
+      text-align: center;
     }
   }
   .detail__body {
-    padding-top: 20px;
+    background-color: rgba(0, 0, 0, 0.500);
+    margin-top: 10px;
+    padding: 0 20px;
     .subtitle {
       font-size: 25px;
-      font-weight: bolder;
       margin-bottom: 10px;
     }
     &__info {
@@ -51,7 +59,7 @@
       }
     }
     &__synopsis {
-      margin-top: 20px;
+      margin-top: 25px;
       p {
         margin-top: 10px;
       }
@@ -60,7 +68,7 @@
       width: 100%;
       height: auto;
       display: inline-block;
-      margin-top: 20px;
+      margin-top: 25px;
       &__cast {
         float: left;
         width: 50%;
@@ -88,7 +96,7 @@
       width: 100%;
       height: auto;
       display: inline-block;
-      margin-top: 20px;
+      margin-top: 25px;
       &__music {
         float: left;
         width: 50%;
@@ -101,7 +109,10 @@
       }
     }
     &__official {
-      margin: 20px 0 200px 0;
+      width: 100%;
+      height: auto;
+      display: inline-block;
+      margin: 25px 0 20px 0;
       &__web {
         float: left;
         width: 50%;
