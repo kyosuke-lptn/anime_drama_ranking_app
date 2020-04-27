@@ -6,9 +6,10 @@ from django.test import TestCase
 
 from ranking import factory
 from ranking.mock import response_data_mock
+from ranking.models import Content
+from ranking.models import ScrapingContent
 from ranking.models import TwitterApi
 from ranking.models import TwitterUser
-from ranking.models import Content
 
 # Create your tests here.
 
@@ -140,4 +141,45 @@ class TwitterApiModelTests(TestCase):
 
 class WebScrapingModelTests(TestCase):
 
-    def
+    @mock.patch('ranking.models.ScrapingContent.extra_data_from')
+    def test_store_contents_data(self, mock_contents_data):
+        test_data = [
+            {'name': 'サンプルドラマ',
+             'description': '詳細について',
+             'cast': ['主人公：田中太郎', 'ヒロイン：はげ'],
+             'official_url': 'http://sample.com/aniani/',
+             'maker': 'A制作会社',
+             'staff': ['【原作】ランキングコミック、鈴木次郎', '【監督】別所誠人'],
+             'img_url': 'https://sample.com/image/2222',
+             'screen_name': 'test_name'}]
+        mock_contents_data.return_value = test_data
+
+        scraping = ScrapingContent()
+        scraping.contents_data = scraping.extra_data_from('test')
+        category = factory.CategoryFactory(name='Movie')
+        scraping.store_contents_data(category)
+
+        content = Content.objects.get(name=test_data[0]['name'])
+        self.assertEqual(content.description, test_data[0]['description'])
+        self.assertEqual(content.maker, test_data[0]['maker'])
+        self.assertEqual(content.screen_name, test_data[0]['screen_name'])
+        self.assertEqual(content.category, category)
+        self.assertEqual(content.staff_set.all().count(), 5)
+
+    @mock.patch('ranking.models.ScrapingContent.extra_data_from')
+    def test_store_contents_data_with_little_data(self, mock_contents_data):
+        little_data = [
+            {'name': 'サンプルドラマ'}]
+        mock_contents_data.return_value = little_data
+
+        scraping = ScrapingContent()
+        scraping.contents_data = scraping.extra_data_from('test')
+        category = factory.CategoryFactory(name='Movie')
+        scraping.store_contents_data(category)
+
+        content = Content.objects.get(name=little_data[0]['name'])
+        self.assertEqual(content.description, None)
+        self.assertEqual(content.maker, None)
+        self.assertEqual(content.screen_name, None)
+        self.assertEqual(content.category, category)
+        self.assertEqual(content.staff_set.all().count(), 0)

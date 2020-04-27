@@ -26,16 +26,19 @@ class Category(models.Model):
 
 class Content(models.Model):
     name = models.CharField('作品名', max_length=50, unique=True, db_index=True)
-    description = models.TextField('詳細説明')
+    description = models.TextField('詳細説明', null=True, blank=True)
     release_date = models.DateField('リリース日', db_index=True, null=True,
                                     blank=True)
-    maker = models.CharField('作り手', max_length=50, db_index=True)
+    maker = models.CharField('作り手', max_length=50, db_index=True, null=True,
+                             blank=True)
     update_date = models.DateTimeField('更新日', auto_now=True, db_index=True,
                                        null=True, blank=True)
     screen_name = models.CharField('twitter ID', max_length=50, unique=True,
                                    db_index=True, null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE,
                                  verbose_name='ジャンル', db_index=True)
+    img_url = models.CharField('画像のURL', max_length=500, null=True,
+                               blank=True)
 
     def __str__(self):
         return self.name
@@ -45,6 +48,14 @@ class Content(models.Model):
                                                     'tweet_set'):
             return True
         return False
+
+
+class Staff(models.Model):
+    name = models.CharField(max_length=50, db_index=True)
+    role = models.CharField(max_length=50, db_index=True)
+    is_cast = models.BooleanField(db_index=True, default=False)
+    content = models.ForeignKey(Content, on_delete=models.CASCADE,
+                                verbose_name='作品', db_index=True)
 
 
 class TwitterUser(models.Model):
@@ -254,6 +265,7 @@ class TwitterApi(object):
 
 
 ANIME_TOP_URL = 'https://anime.eiga.com'
+EXCLUSION_LIST = ['share', 'bs7ch_pr', 'tvtokyo_pr', 'intent', 'search']
 
 
 class ScrapingContent(object):
@@ -298,9 +310,7 @@ class ScrapingContent(object):
                 staff = soup.select_one('#detailStaff > dd')
                 img_data = soup.select_one(
                     '#main > div:nth-child(1) > div.articleInner > div > div > div.animeDetailBox.clearfix > div.animeDetailImg > img')
-                print(content.text)
                 screen_name = self.get_screen_name_from(official_url.text)
-                print(screen_name)
                 if description_data:
                     content_dict['description'] = description_data.text
                 if cast_data:
@@ -313,7 +323,7 @@ class ScrapingContent(object):
                     staff_list = [item.text for item in staff.find_all('li')]
                     content_dict['staff'] = staff_list
                 if img_data:
-                    content_dict['img'] = img_data['src']
+                    content_dict['img_url'] = img_data['src']
                 if screen_name:
                     content_dict['screen_name'] = screen_name
 
@@ -321,17 +331,58 @@ class ScrapingContent(object):
                 time.sleep(1)
         return self.contents_data
 
-    # TODO (sumitani) 除外する文言を追加する
     def get_screen_name_from(self, url):
         response = self.get_html_from(url)
         soup = BeautifulSoup(response.data, 'lxml')
-        pattern = r'href="https://twitter.com/(\w+)(\?\w+=\w+)?"'
+        pattern = r'https://twitter.com/(\w+)(\?\w+=\w+)?'
         repatter = re.compile(pattern)
-        extract_a_tag_list = repatter.findall(str(soup))
-        print(extract_a_tag_list)
-        if extract_a_tag_list:
-            screen_name = Counter(extract_a_tag_list).most_common()[0][0][0]
-        else:
-            screen_name = None
-        time.sleep(1)
+        a_tag_list = soup.find_all('a', {'href': repatter})
+        screen_name = None
+        if a_tag_list:
+            extract_a_tag_list = [
+                repatter.match(attr['href']).groups()[0].lower() for attr in
+                a_tag_list]
+            for word in EXCLUSION_LIST:
+                if word in extract_a_tag_list:
+                    extract_a_tag_list.remove(word)
+            if extract_a_tag_list:
+                screen_name = Counter(extract_a_tag_list).most_common()[0][0]
         return screen_name
+
+    # TODO 保存する。　ー　(4) official_urlをどうやって使うか？sc_nameを拾えなかったものをどうする？
+    # TODO (3) 取得できなかった情報について、release_dateについて
+    # TODO (2) テストをかく
+    def store_contents_data(self, category):
+        """
+        引数のデータをcontentモデル・staffモデルとして保存する。
+        :param category: obj
+        :return:
+        """
+        for content_data in self.contents_data:
+            fields_list = ['name', 'description', 'maker', 'screen_name',
+                           'img_url']
+            content_args = {'category': category}
+            for attr_key, attr_value in content_data.items():
+                if attr_key in fields_list:
+                    content_args[attr_key] = attr_value
+            new_content = Content.objects.create(**content_args)
+
+            if 'staff' in content_data:
+                role_and_name = [re.split('[【】、]', person)
+                                 for person in content_data['staff']]
+                for item in role_and_name:
+                    staff_args = {'name': item[1], 'role': item[2],
+                                  'content': new_content}
+                    Staff.objects.create(**staff_args)
+                    limit = len(item) - 3
+                    for num in range(limit):
+                        staff_args = {'name': item[1], 'role': item[num + 3],
+                                      'content': new_content}
+                        Staff.objects.create(**staff_args)
+            if 'cast' in content_data:
+                role_and_name = [
+                    person.split('：') for person in content_data['cast']]
+                for person in role_and_name:
+                    staff_args = {'role': person[0], 'name': person[1],
+                                  'content': new_content, 'is_cast': True}
+                    Staff.objects.create(**staff_args)
