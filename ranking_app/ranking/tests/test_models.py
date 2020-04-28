@@ -59,6 +59,50 @@ class ContentModelTests(TestCase):
 
         self.assertTrue(content.has_tweets())
 
+    def test_appraise(self):
+        content = factory.ContentFactory()
+        twitter_user = factory.TwitterUserFactory(content=content)
+        for num in range(50):
+            tweet = factory.TweetFactory(tweet_id=str(num),
+                                         twitter_user=twitter_user)
+            factory.TweetCountFactory(tweet=tweet, retweet_count=10,
+                                      favorite_count=20)
+        twitter_user.loads_tweet()
+
+        self.assertEqual(content.appraise(), 0.40)
+
+    def test_appraise_when_no_twitter_data(self):
+        content = factory.ContentFactory()
+
+        self.assertEqual(content.appraise(), 0)
+
+    def test_sort_twitter_rating_by(self):
+        anime_category = factory.CategoryFactory(name='アニメ')
+        dorama_category = factory.CategoryFactory(name='ドラマ')
+        content = self.create_content_twitter_tweet_tweetcount(
+            anime_category, retweet=100)
+        low_content = self.create_content_twitter_tweet_tweetcount(
+            anime_category, retweet=10)
+        dorama_content = self.create_content_twitter_tweet_tweetcount(
+            dorama_category)
+
+        sort_contents = Content.sort_twitter_rating_by(anime_category)
+        sort_contents_only = [con[0] for con in sort_contents]
+        self.assertEqual([content, low_content], sort_contents_only)
+        self.assertNotIn(dorama_content, sort_contents_only)
+        self.assertEqual(low_content, sort_contents_only[-1])
+
+    @staticmethod
+    def create_content_twitter_tweet_tweetcount(category, retweet=10):
+        content = factory.ContentFactory(category=category)
+        twitter_user = factory.TwitterUserFactory(content=content)
+        for num in range(50):
+            tweet = factory.TweetFactory(twitter_user=twitter_user)
+            factory.TweetCountFactory(tweet=tweet, retweet_count=retweet,
+                                      favorite_count=20)
+        twitter_user.loads_tweet()
+        return content
+
 
 class CategoryModelTests(TestCase):
 

@@ -61,7 +61,7 @@ class TweetFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Tweet
 
-    tweet_id = '1'
+    tweet_id = factory.Faker('msisdn')
     text = factory.Faker('sentence', nb_words=12, locale='ja')
     tweet_date = factory.Faker('date_time_ad', tzinfo=JA_TZ,
                                start_datetime=START_TIME)

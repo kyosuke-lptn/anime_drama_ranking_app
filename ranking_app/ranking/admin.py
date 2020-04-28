@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db import models
 
 from .models import Content
 from .models import Category
@@ -25,7 +26,7 @@ class StaffInline(admin.StackedInline):
 
 @admin.register(Content)
 class ContentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'update_date', 'twitteruser', 'get_tw_user_data')
+    list_display = ('name', 'update_date', 'twitteruser', 'appraise', 'get_tw_user_data')
     fieldsets = [
         (None, {'fields': ['name', 'screen_name', 'description',
                            ('maker', 'img_url'),
@@ -34,7 +35,7 @@ class ContentAdmin(admin.ModelAdmin):
         ('最新ツイート', {'fields': ['latest_tweet_text', 'latest_tweet_date',
                                'latest_tweet_create_date']})]
     readonly_fields = ('update_date', 'latest_tweet_text', 'latest_tweet_date',
-                       'latest_tweet_create_date')
+                       'latest_tweet_create_date', 'appraise')
     inlines = [StaffInline, TwitterUserInline]
 
     def get_tw_user_data(self, obj):

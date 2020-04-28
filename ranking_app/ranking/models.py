@@ -50,6 +50,32 @@ class Content(models.Model):
             return True
         return False
 
+    def appraise(self):
+        """
+        （いいねx1 ＋ リツイートx2）/100の計算式でランキングのための数値を算出しています。
+        これは、いいねよりリツイートの方が数が比較的少なく、リツイートの方が価値が高いと考えたためです。
+        :return:
+        """
+        if self.has_tweets():
+            retweet_avg = self.twitteruser.retweets_avg()
+            favorite_avg = self.twitteruser.favorite_avg()
+            result = (favorite_avg + retweet_avg * 2) / 100
+            return round(result, 2)
+        else:
+            return 0
+
+    @classmethod
+    def sort_twitter_rating_by(cls, category):
+        """
+        カテゴリーに含まれるツイッター評価値順にソートしたコンテンツを返す
+        :return: tuple in list
+        """
+        contents = {
+            content: content.appraise()
+            for content in cls.objects.filter(category=category)}
+        score_sorted = sorted(contents.items(), key=lambda x: x[1], reverse=True)
+        return score_sorted
+
 
 class Staff(models.Model):
     name = models.CharField(max_length=50, db_index=True)

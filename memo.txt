@@ -32,11 +32,14 @@ profile_banner_url
 retweet_count
 favorite_count
 
+＊評価について
+（いいねx1 ＋ リツイートx2）/100
 
 # TODO (sumitnai) 3 ランキング機能の作成
 # TODO (sumitnai) 6 templateに落としていく
 # TODO (sumitnai) 7 データの取得について考える
-# TODO (sumitnai) -- リリース日
+# TODO (sumitnai)    --  ドラマについて
+# TODO (sumitnai)    --  リリース日
 # TODO (sumitnai) -- クーロンで回すツイッターデータ更新用コマンドの作成
 # TODO (sumitnai) -- グラフ化を考える
 # TODO (sumitnai) -- ユーザ機能を考える
