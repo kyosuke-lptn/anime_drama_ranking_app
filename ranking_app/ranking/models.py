@@ -284,7 +284,6 @@ class TwitterApi(object):
         """
         TwitterAPIからのデータを取得して、TwitterUserとTweetのモデルをアップデートする
         :param content: obj
-        :param start_datetime: datetime
         """
         screen_name = content.screen_name
         twitter_user = content.twitteruser
@@ -386,7 +385,6 @@ class ScrapingContent(object):
                 screen_name = Counter(correct_a_tag).most_common()[0][0]
         return screen_name
 
-    # TODO 保存する。　ー　(4) official_urlをどうやって使うか？sc_nameを拾えなかったものをどうする？
     # TODO (3) 取得できなかった情報について、release_dateについて
     @transaction.atomic
     def store_contents_data(self, category):
@@ -409,12 +407,13 @@ class ScrapingContent(object):
                     role_and_name = [re.split('[【】、]', person)
                                      for person in content_data['staff']]
                     for item in role_and_name:
-                        staff_args = {'name': item[1], 'role': item[2],
+                        staff_args = {'name': item[2], 'role': item[1],
                                       'content': new_content}
                         Staff.objects.create(**staff_args)
                         limit = len(item) - 3
                         for num in range(limit):
-                            staff_args = {'name': item[1], 'role': item[num + 3],
+                            staff_args = {'role': item[1],
+                                          'name': item[num + 3],
                                           'content': new_content}
                             Staff.objects.create(**staff_args)
                 if 'cast' in content_data:

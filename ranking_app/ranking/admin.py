@@ -14,7 +14,8 @@ class TwitterUserInline(admin.StackedInline):
     extra = 0
     readonly_fields = ('name', 'description', 'official_url', 'icon_url',
                        'banner_url', 'followers_count', 'create_date',
-                       'update_date')
+                       'update_date', 'all_tweet_count', 'all_retweet_count',
+                       'all_favorite_count')
 
 
 class StaffInline(admin.StackedInline):
@@ -65,10 +66,8 @@ class ContentAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        api = TwitterApi()
-        if obj.has_tweets():
-            api.update_data(obj)
-        else:
+        if not obj.has_tweets():
+            api = TwitterApi()
             api.get_and_store_twitter_data(obj)
 
 

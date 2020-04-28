@@ -33,18 +33,14 @@ retweet_count
 favorite_count
 
 
-# TODO (sumitnai) 4 データの取得について考える
-# TODO (sumitnai) -- コマンド実行 -( コンテンツのデータ取得 - Modelに作成 - sc_nameがあるModelのみteitterのデータ取得（フィールド追加？））
-# TODO (sumitnai) -- ツイッターデータの更新。スクレイピングの複数実行について。TwitterApiの制限への対応
-# TODO (sumitnai) -- リリース日
-# TODO (sumitnai) 5 管理画面の追加
-# TODO (sumitnai) -- admin画面に情報の確認画面を追加。
-# TODO (sumitnai) -- admin画面に不足情報を求められる画面を追加。（twitterデータの追加）
+# TODO (sumitnai) 3 ランキング機能の作成
 # TODO (sumitnai) 6 templateに落としていく
-# TODO (sumitnai) -- seleniumを採用するか考える（コメントアウトしている）必要であればrequirements.txtに追加する selenium==3.141.0
-# TODO (sumitnai) -- dateをツイッターからアップデートする時に今季の作品のみに絞る機能
-# TODO (sumitnai) -- apiから出るエラーの時の対応, ログについて
-# TODO (sumitnai) -- 各コンテンツの詳細情報について考える
-# TODO (sumitnai) -- ユーザ機能を考える
+# TODO (sumitnai) 7 データの取得について考える
+# TODO (sumitnai) -- リリース日
+# TODO (sumitnai) -- クーロンで回すツイッターデータ更新用コマンドの作成
 # TODO (sumitnai) -- グラフ化を考える
+# TODO (sumitnai) -- ユーザ機能を考える
+# TODO (sumitnai) -- apiから出るエラーの時の対応, ログについて
+# TODO (sumitnai) -- 管理画面の修正
+# TODO (sumitnai) -- seleniumを採用するか考える（コメントアウトしている）必要であればrequirements.txtに追加する selenium==3.141.0
 
