@@ -3,6 +3,7 @@ from datetime import datetime
 import json
 import re
 import time
+from pytz import timezone
 
 from bs4 import BeautifulSoup
 from django.db import models
@@ -161,6 +162,7 @@ class TwitterApi(object):
     def get_base(self, url, query_dict):
         response = self.__api.get(url, params=query_dict)
         result = json.loads(response.text)
+        time.sleep(1)
         return result
 
     def get_simple_timeline(self, screen_name, max_id=None, since_id=None):
@@ -170,17 +172,18 @@ class TwitterApi(object):
             "count": TIMELINE_COUNT,
             "trim_user": TIMELINE_TRIM_USER,
             "include_rts": TIMELINE_INCLUDE_RTS}
-        if max_id:
+        if max_id or max_id == 0:
             query["max_id"] = max_id
         if since_id:
             query["since_id"] = since_id
         return self.get_base(timeline_url, query)
 
-    def get_most_timeline(self, screen_name):
-        timeline = self.get_simple_timeline(screen_name)
+    def get_most_timeline(self, screen_name, since_id=None):
+        timeline = self.get_simple_timeline(screen_name, since_id=since_id)
         next_id = timeline[-1]["id"] - 1
         while True:
-            result = self.get_simple_timeline(screen_name, max_id=next_id)
+            result = self.get_simple_timeline(screen_name, max_id=next_id,
+                                              since_id=since_id)
             timeline.extend(result)
             if result:
                 next_id = result[-1]["id"] - 1
@@ -232,12 +235,14 @@ class TwitterApi(object):
                 tweet_time = tweet['created_at']
                 converted_time = datetime.strptime(
                     tweet_time, '%a %b %d %H:%M:%S %z %Y')
-                new_tweet = Tweet.objects.create(
-                    twitter_user=twitter_user, tweet_id=tweet['id_str'],
-                    tweet_date=converted_time, text=tweet['text'])
-                TweetCount.objects.create(tweet=new_tweet,
-                                          retweet_count=tweet['retweet_count'],
-                                          favorite_count=tweet['favorite_count'])
+                tweet_args = {'twitter_user': twitter_user,
+                              'tweet_date': converted_time,
+                              'text': tweet['text']}
+                new_tweet = Tweet.objects.update_or_create(
+                    defaults=tweet_args, tweet_id=tweet['id_str'])[0]
+                TweetCount.objects.create(
+                    tweet=new_tweet, retweet_count=tweet['retweet_count'],
+                    favorite_count=tweet['favorite_count'])
             twitter_user.loads_tweet()
 
     @transaction.atomic
@@ -253,31 +258,39 @@ class TwitterApi(object):
             twitter_user = self.store_user(screen_name, user_data)
             self.store_timeline_data(timeline_data, twitter_user)
 
-    # TODO 変更する。
-    # def get_updated_timeline(self, screen_name, twitter_user, start_datetime):
-    def get_updated_timeline(self, screen_name, twitter_user):
-        latest_tweet = twitter_user.tweet_set.order_by('-tweet_date')[0]
-        next_id = int(latest_tweet.tweet_id)
+    def get_updated_timeline(self, screen_name, twitter_user, start_datetime):
+        target_tweet = twitter_user.tweet_set.filter(
+            tweet_date__gte=start_datetime).order_by('tweet_date')[0]
+        since_id = int(target_tweet.tweet_id) - 1
+        timeline_data = self.get_most_timeline(screen_name, since_id=since_id)
+        return timeline_data
 
-        timeline = []
-        while True:
-            result = self.get_simple_timeline(screen_name, since_id=next_id)
-            timeline.extend(result)
-            if result:
-                next_id = result[0]['id']
-            else:
-                break
-        return timeline
+    @classmethod
+    def start_datetime(cls):
+        ja_tz = timezone('Asia/Tokyo')
+        current_month = datetime.now().month
+        current_year = datetime.now().year
+        if current_month in [1, 2, 3]:
+            return datetime(current_year, 1, 1, tzinfo=ja_tz)
+        elif current_month in [4, 5, 6]:
+            return datetime(current_year, 4, 1, tzinfo=ja_tz)
+        elif current_month in [7, 8, 9]:
+            return datetime(current_year, 7, 1, tzinfo=ja_tz)
+        elif current_month in [10, 11, 12]:
+            return datetime(current_year, 10, 1, tzinfo=ja_tz)
 
     @transaction.atomic
     def update_data(self, content):
         """
         TwitterAPIからのデータを取得して、TwitterUserとTweetのモデルをアップデートする
         :param content: obj
+        :param start_datetime: datetime
         """
         screen_name = content.screen_name
         twitter_user = content.twitteruser
-        timeline = self.get_updated_timeline(screen_name, twitter_user)
+        start_datetime = self.start_datetime()
+        timeline = self.get_updated_timeline(screen_name, twitter_user,
+                                             start_datetime)
         user_data = self.get_user(screen_name)
         updated_twitter_user = self.store_user(screen_name, user_data, content)
         self.store_timeline_data(timeline, updated_twitter_user)

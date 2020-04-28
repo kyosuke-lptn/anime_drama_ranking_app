@@ -6,7 +6,7 @@ twitter api
 （リツイートやリプライを含む）
 
 1作品につき最大16リクエストが必要となる。
-1分間に56作品の情報を取得できる。
+15分間に56作品の情報を取得できる。
 1日に6250作品の情報を取得できる。（全ての作品がツイート上限を最大の場合）
 
 制限：
@@ -42,6 +42,7 @@ favorite_count
 # TODO (sumitnai) -- admin画面に不足情報を求められる画面を追加。（twitterデータの追加）
 # TODO (sumitnai) 6 templateに落としていく
 # TODO (sumitnai) -- seleniumを採用するか考える（コメントアウトしている）必要であればrequirements.txtに追加する selenium==3.141.0
+# TODO (sumitnai) -- dateをツイッターからアップデートする時に今季の作品のみに絞る機能
 # TODO (sumitnai) -- apiから出るエラーの時の対応, ログについて
 # TODO (sumitnai) -- 各コンテンツの詳細情報について考える
 # TODO (sumitnai) -- ユーザ機能を考える

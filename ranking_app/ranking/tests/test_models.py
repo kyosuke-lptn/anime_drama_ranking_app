@@ -1,3 +1,5 @@
+from datetime import datetime
+from pytz import timezone
 from unittest import mock
 
 from django.db.utils import IntegrityError
@@ -177,25 +179,38 @@ class TwitterApiModelTests(TestCase):
         self.assertIsNone(twitter_user.banner_url, None)
 
     @mock.patch('ranking.models.TwitterApi.get_base')
-    def test_update_twitter_data(self, mock_get_base):
+    def test_update_data(self, mock_get_base):
+        """
+        # start_dateよりも古いツイートを取得できないかのテストはまだかけていない
+        tweet_idが１〜５０のものを持っている状態で、更新データとして、tweet_idが１〜１００の
+        ツイートを取得したときのテスト
+        """
         mock_get_base.side_effect = response_data_mock
 
+        ja_tz = timezone('Asia/Tokyo')
+        start_time = datetime(2020, 4, 1, tzinfo=ja_tz)
         twitter_user = factory.TwitterUserFactory(content=self.content)
-        tweet = factory.TweetFactory(twitter_user=twitter_user, tweet_id='1')
-        factory.TweetCountFactory(tweet=tweet, retweet_count=10,
-                                  favorite_count=10)
+        for tweet_id in range(0, 50):
+            tweet = factory.TweetFactory(twitter_user=twitter_user,
+                                         tweet_id=str(tweet_id),
+                                         tweet_date=start_time)
+            factory.TweetCountFactory(tweet=tweet, retweet_count=10,
+                                      favorite_count=10)
         twitter_user.loads_tweet()
+        before_tweet_count = twitter_user.tweet_set.all().count()
 
         TwitterApi().update_data(self.content)
 
         updated_twitter_user = TwitterUser.objects.get(pk=twitter_user.pk)
-        updated_tweet_count = updated_twitter_user.tweet_set.all().count()
+        after_tweet_count = updated_twitter_user.tweet_set.all().count()
+        updated_tweet = updated_twitter_user.tweet_set.get(tweet_id=1)
         self.assertNotEqual(twitter_user.name, updated_twitter_user.name)
-        self.assertEqual(updated_tweet_count, 51)
         self.assertEqual(updated_twitter_user.all_tweet_count,
-                         updated_tweet_count)
-        self.assertGreater(updated_twitter_user.all_retweet_count, 10)
-        self.assertGreater(updated_twitter_user.all_favorite_count, 10)
+                         after_tweet_count)
+        self.assertGreater(after_tweet_count, before_tweet_count)
+        self.assertGreater(updated_twitter_user.all_retweet_count, 500)
+        self.assertGreater(updated_twitter_user.all_favorite_count, 500)
+        self.assertEqual(updated_tweet.tweetcount_set.all().count(), 2)
 
 
 class WebScrapingModelTests(TestCase):

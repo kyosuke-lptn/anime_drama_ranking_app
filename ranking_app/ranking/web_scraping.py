@@ -7,6 +7,10 @@ def main():
     response = content_getter.get_html_from(url)
     contents_data = content_getter.extra_data_from(response)
 
+
+
+
+
 # 取得できなかったもの
 """
 おりがみにんじゃ コーヤン＠きんてれ　share

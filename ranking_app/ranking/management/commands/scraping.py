@@ -16,6 +16,7 @@ class Command(BaseCommand):
                             help='ドラマ情報を取得します。')
 
     def handle(self, *args, **options):
+        # TODO 取得データをファイルに一時保存んするか考える。スクレイピング結果の確認方法について。
         if options['anime']:
             content_getter = ScrapingContent().get_anime_data()
             if content_getter.contents:
@@ -23,7 +24,8 @@ class Command(BaseCommand):
                 api = TwitterApi()
                 for content in content_getter.contents:
                     api.get_and_store_twitter_data(content)
+                print('モデルを作成しました。')
             else:
                 print('スクレイピングが失敗しました。コードを見直してください。')
-        elif options['dorama']:
+        if options['dorama']:
             print('あとで実装します。。')

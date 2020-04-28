@@ -12,9 +12,9 @@ from .models import Staff
 class TwitterUserInline(admin.StackedInline):
     model = TwitterUser
     extra = 0
-    readonly_fields = ('name', 'description', 'official_url',
-                       'icon_url', 'banner_url', 'followers_count',
-                       'create_date', 'update_date')
+    readonly_fields = ('name', 'description', 'official_url', 'icon_url',
+                       'banner_url', 'followers_count', 'create_date',
+                       'update_date')
 
 
 class StaffInline(admin.StackedInline):

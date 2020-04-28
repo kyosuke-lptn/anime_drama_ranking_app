@@ -5,17 +5,11 @@ import random
 from faker import Faker
 
 
-def support_datetime_default(obj):
-    if isinstance(obj, datetime):
-        return obj.isoformat()
-    raise TypeError(repr(obj) + " is not JSON serializable")
-
-
 def create_tweets(limit_id):
     response_data = []
     ja_tz = timezone('Asia/Tokyo')
     start_time = datetime(2000, 1, 1, tzinfo=ja_tz)
-    for tweet_id in range(limit_id, limit_id + 50):
+    for tweet_id in range(limit_id, limit_id-50, -1):
         time = fake.date_time_ad(tzinfo=ja_tz, start_datetime=start_time)
         convert_time = time.strftime('%a %b %d %H:%M:%S %z %Y')
         response_data.append({
@@ -24,7 +18,7 @@ def create_tweets(limit_id):
             'created_at': convert_time,
             'retweet_count': random.randrange(500),
             'favorite_count': random.randrange(500)})
-    if response_data[-1]['id'] > 100:
+    if response_data[-1]['id'] < 0:
         response_data = []
     return response_data
 
@@ -44,17 +38,7 @@ def response_data_mock(url, query):
     elif url == "https://api.twitter.com/1.1/statuses/user_timeline.json":
         if 'max_id' in query:
             max_id = query['max_id']
-            max_id += 2
         else:
-            max_id = 0
-        if 'since_id' in query:
-            max_id = query['since_id']
-            max_id += 49
+            max_id = 100
         response_data = create_tweets(max_id)
         return response_data
-
-
-# def response_updated_mock(url, query):
-#     if url == "https://api.twitter.com/1.1/statuses/user_timeline.json":
-
-
