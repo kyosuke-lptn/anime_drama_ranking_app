@@ -199,6 +199,14 @@ class TwitterApiModelTests(TestCase):
 
 
 class WebScrapingModelTests(TestCase):
+    @staticmethod
+    def get_anime_data(category):
+        """
+        get_anime_dataメソッドをテストするためのメソッド。テスト用に少し変更しています。
+        """
+        scraping = ScrapingContent()
+        scraping.contents_data = scraping.extra_data_from('test')
+        scraping.store_contents_data(category)
 
     @mock.patch('ranking.models.ScrapingContent.extra_data_from')
     def test_store_contents_data(self, mock_contents_data):
@@ -213,10 +221,8 @@ class WebScrapingModelTests(TestCase):
              'screen_name': 'test_name'}]
         mock_contents_data.return_value = test_data
 
-        scraping = ScrapingContent()
-        scraping.contents_data = scraping.extra_data_from('test')
-        category = factory.CategoryFactory(name='Movie')
-        scraping.store_contents_data(category)
+        category = factory.CategoryFactory(name='アニメ')
+        self.get_anime_data(category)
 
         content = Content.objects.get(name=test_data[0]['name'])
         self.assertEqual(content.description, test_data[0]['description'])
@@ -230,10 +236,8 @@ class WebScrapingModelTests(TestCase):
         little_data = [{'name': 'サンプルドラマ'}]
         mock_contents_data.return_value = little_data
 
-        scraping = ScrapingContent()
-        scraping.contents_data = scraping.extra_data_from('test')
-        category = factory.CategoryFactory(name='Movie')
-        scraping.store_contents_data(category)
+        category = factory.CategoryFactory(name='アニメ')
+        self.get_anime_data(category)
 
         content = Content.objects.get(name=little_data[0]['name'])
         self.assertEqual(content.description, None)
@@ -241,3 +245,12 @@ class WebScrapingModelTests(TestCase):
         self.assertEqual(content.screen_name, None)
         self.assertEqual(content.category, category)
         self.assertEqual(content.staff_set.all().count(), 0)
+
+    @mock.patch('ranking.models.ScrapingContent.extra_data_from')
+    def test_store_contents_data_without_data(self, mock_contents_data):
+        mock_contents_data.return_value = []
+
+        category = factory.CategoryFactory(name='アニメ')
+        self.get_anime_data(category)
+
+        self.assertEqual(Content.objects.all().count(), 0)

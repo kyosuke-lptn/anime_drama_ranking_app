@@ -291,8 +291,6 @@ class ScrapingContent(object):
     def __init__(self):
         self.contents_data = []
         self.contents = []
-        self.default_data_list = ['name', 'description', 'cast', 'official_url',
-                                  'maker', 'staff', 'img_url', 'screen_name']
 
     def create_url(self, url='', anime_default=False):
         if anime_default:
@@ -317,21 +315,26 @@ class ScrapingContent(object):
 
     def extra_data_from(self, response):
         soup = BeautifulSoup(response.data, 'lxml')
-        for p_tag in soup.find_all('p', {'class': 'seasonAnimeTtl'}):
-            for content in p_tag:
-                content_dict = {'name': content.text}
-                url = self.create_url(content['href'], anime_default=True)
+        anime_boxes = soup.find_all('div', {'class': 'animeSeasonBox'})
+        if anime_boxes:
+            for box in anime_boxes:
+                p_tag = box.find('p', 'seasonAnimeTtl')
+                content_dict = {'name': p_tag.text}
+                detail_url = p_tag.find('a')['href']
+                maker_tag = box.select('dt:contains("制作会社") ~ dd')
+                if maker_tag:
+                    content_dict['maker'] = maker_tag[0].text
+                url = self.create_url(detail_url, anime_default=True)
                 html_data = self.get_html_from(url)
                 soup = BeautifulSoup(html_data.data, 'lxml')
                 description_data = soup.select_one('#detailSynopsis > dd')
                 cast_data = soup.select_one(
                     '#detailCast > dd > ul:nth-child(1)')
                 official_url = soup.select_one('#detailLink > dd > ul > li > a')
-                maker = soup.select_one(
-                    '#main > div:nth-child(1) > div.articleInner > div > div > div.animeDetailBox.clearfix > div.animeDetailL > dl:nth-child(3) > dd > ul > li')
                 staff = soup.select_one('#detailStaff > dd')
                 img_data = soup.select_one(
-                    '#main > div:nth-child(1) > div.articleInner > div > div > div.animeDetailBox.clearfix > div.animeDetailImg > img')
+                    '#main > div:nth-child(1) > div.articleInner > div > div'
+                    '> div.animeDetailBox.clearfix > div.animeDetailImg > img')
                 screen_name = self.get_screen_name_from(official_url.text)
                 if description_data:
                     content_dict['description'] = description_data.text
@@ -339,8 +342,6 @@ class ScrapingContent(object):
                     cast = [person.text for person in cast_data.find_all('li')]
                     content_dict['cast'] = cast
                 content_dict['official_url'] = official_url.text
-                if maker:
-                    content_dict['maker'] = maker.text
                 if staff:
                     staff_list = [item.text for item in staff.find_all('li')]
                     content_dict['staff'] = staff_list
@@ -380,35 +381,36 @@ class ScrapingContent(object):
         引数のデータをcontentモデル・staffモデルとして保存する。
         :param category: obj
         """
-        for content_data in self.contents_data:
-            fields_list = ['name', 'description', 'maker', 'screen_name',
-                           'img_url']
-            content_args = {'category': category}
-            for attr_key, attr_value in content_data.items():
-                if attr_key in fields_list:
-                    content_args[attr_key] = attr_value
-            new_content = Content.objects.create(**content_args)
-            self.contents.append(new_content)
+        if self.contents_data:
+            for content_data in self.contents_data:
+                fields_list = ['name', 'description', 'maker', 'screen_name',
+                               'img_url']
+                content_args = {'category': category}
+                for attr_key, attr_value in content_data.items():
+                    if attr_key in fields_list:
+                        content_args[attr_key] = attr_value
+                new_content = Content.objects.create(**content_args)
+                self.contents.append(new_content)
 
-            if 'staff' in content_data:
-                role_and_name = [re.split('[【】、]', person)
-                                 for person in content_data['staff']]
-                for item in role_and_name:
-                    staff_args = {'name': item[1], 'role': item[2],
-                                  'content': new_content}
-                    Staff.objects.create(**staff_args)
-                    limit = len(item) - 3
-                    for num in range(limit):
-                        staff_args = {'name': item[1], 'role': item[num + 3],
+                if 'staff' in content_data:
+                    role_and_name = [re.split('[【】、]', person)
+                                     for person in content_data['staff']]
+                    for item in role_and_name:
+                        staff_args = {'name': item[1], 'role': item[2],
                                       'content': new_content}
                         Staff.objects.create(**staff_args)
-            if 'cast' in content_data:
-                role_and_name = [
-                    person.split('：') for person in content_data['cast']]
-                for person in role_and_name:
-                    staff_args = {'role': person[0], 'name': person[1],
-                                  'content': new_content, 'is_cast': True}
-                    Staff.objects.create(**staff_args)
+                        limit = len(item) - 3
+                        for num in range(limit):
+                            staff_args = {'name': item[1], 'role': item[num + 3],
+                                          'content': new_content}
+                            Staff.objects.create(**staff_args)
+                if 'cast' in content_data:
+                    role_and_name = [
+                        person.split('：') for person in content_data['cast']]
+                    for person in role_and_name:
+                        staff_args = {'role': person[0], 'name': person[1],
+                                      'content': new_content, 'is_cast': True}
+                        Staff.objects.create(**staff_args)
 
     def get_anime_data(self):
         """

@@ -1,9 +1,11 @@
 from ranking.models import *
-content_getter = ScrapingContent()
-url = content_getter.create_url('/program', anime_default=True)
-response = content_getter.get_html_from(url)
-contents_data = content_getter.extra_data_from(response)
 
+
+def main():
+    content_getter = ScrapingContent()
+    url = content_getter.create_url('/program', anime_default=True)
+    response = content_getter.get_html_from(url)
+    contents_data = content_getter.extra_data_from(response)
 
 # 取得できなかったもの
 """
@@ -20,5 +22,6 @@ contents_data = content_getter.extra_data_from(response)
 魔神英雄伝ワタル 七魂の龍神丸
 """
 
-
+if __name__ == '__main__':
+    main()
 

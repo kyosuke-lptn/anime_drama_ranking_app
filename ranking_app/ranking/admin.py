@@ -1,12 +1,9 @@
 from django.contrib import admin
-from django.urls import path
-from django.shortcuts import render
 
 from .models import Content
 from .models import Category
 from .models import TwitterUser
 from .models import TwitterApi
-from .models import ScrapingContent
 from .models import Staff
 
 # Register your models here.
@@ -30,7 +27,8 @@ class ContentAdmin(admin.ModelAdmin):
     list_display = ('name', 'update_date', 'twitteruser', 'get_tw_user_data')
     fieldsets = [
         (None, {'fields': ['name', 'screen_name', 'description',
-                           ('maker', 'img_url'), ('release_date', 'update_date')]}),
+                           ('maker', 'img_url'),
+                           ('release_date', 'update_date')]}),
         ('カテゴリー', {'fields': ['category']}),
         ('最新ツイート', {'fields': ['latest_tweet_text', 'latest_tweet_date',
                                'latest_tweet_create_date']})]
@@ -73,33 +71,6 @@ class ContentAdmin(admin.ModelAdmin):
         else:
             api.get_and_store_twitter_data(obj)
 
-    def get_urls(self):
-        urls = super().get_urls()
-        add_urls = [
-            path('auto_creation/',
-                 self.admin_site.admin_view(self.auto_creation_view),
-                 name="auto_creation"),
-            path('do_auto_creation/',
-                 self.admin_site.admin_view(self.do_auto_creation_view),
-                 name="do_auto_creation"),
-        ]
-        return add_urls + urls
-
-    def auto_creation_view(self, request):
-        context = None
-        return render(request, 'admin/ranking/content/auto_create.html',
-                      context)
-
-    def do_auto_creation_view(self, request):
-        # 処理が失敗したときのエラー表示をかく
-        content_getter = ScrapingContent().get_anime_data()
-        api = TwitterApi()
-        for content in content_getter.contents:
-            api.get_and_store_twitter_data(content)
-        context = {'contents_data': content_getter.contents_data,
-                   'default_data_list': content_getter.default_data_list}
-        return render(request, 'admin/ranking/content/result.html', context)
-
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -115,6 +86,3 @@ class CategoryAdmin(admin.ModelAdmin):
             return '該当なし'
 
     get_contents.short_description = 'コンテンツ'
-
-
-
