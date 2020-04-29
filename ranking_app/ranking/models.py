@@ -73,8 +73,9 @@ class Content(models.Model):
         contents = {
             content: content.appraise()
             for content in cls.objects.filter(category=category)}
-        score_sorted = sorted(contents.items(), key=lambda x: x[1], reverse=True)
-        return score_sorted
+        score_sorted = sorted(contents.items(), key=lambda x: x[1],
+                              reverse=True)
+        return [content_tuple[0] for content_tuple in score_sorted]
 
 
 class Staff(models.Model):

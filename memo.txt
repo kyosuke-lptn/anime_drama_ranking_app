@@ -40,10 +40,21 @@ favorite_count
 # TODO (sumitnai) 7 データの取得について考える
 # TODO (sumitnai)    --  ドラマについて
 # TODO (sumitnai)    --  リリース日
-# TODO (sumitnai) -- クーロンで回すツイッターデータ更新用コマンドの作成
+# TODO (sumitnai) -- クーロンで回すツイッターデータ更新用コマンドの作成, twitterapiの上限の使用について
 # TODO (sumitnai) -- グラフ化を考える
 # TODO (sumitnai) -- ユーザ機能を考える
 # TODO (sumitnai) -- apiから出るエラーの時の対応, ログについて
 # TODO (sumitnai) -- 管理画面の修正
 # TODO (sumitnai) -- seleniumを採用するか考える（コメントアウトしている）必要であればrequirements.txtに追加する selenium==3.141.0
 
+
+
+          - for content in dorama
+            .container__info__box #{ forloop.counter }位
+              %br
+              %a{href: '/detail'}
+                %img(src = "#{ content.img_url }")
+              %br
+              %a.dra{href: '/detail'}
+                %p.dra= content.name
+                %p.dra= content.appraise
