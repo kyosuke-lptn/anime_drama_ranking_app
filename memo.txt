@@ -1,0 +1,60 @@
+twitter api
+
+【timeline】
+一回のリクエストで取得可能は200ツイート
+1ユーザで最大3200件前のツイートまで遡ることができる。
+（リツイートやリプライを含む）
+
+1作品につき最大16リクエストが必要となる。
+15分間に56作品の情報を取得できる。
+1日に6250作品の情報を取得できる。（全ての作品がツイート上限を最大の場合）
+
+制限：
+15m間に900リクエスト
+1day間に100,000リクエスト
+※制限を超えると429のエラーが出る。
+
+*user
+(info)
+id
+description
+url
+followers_count
+listed_count
+statuses_count
+
+(image)
+profile_image_url_https
+profile_banner_url
+
+
+*timeline
+retweet_count
+favorite_count
+
+＊評価について
+（いいねx1 ＋ リツイートx2）/100
+
+# TODO (sumitnai) 3 ランキング機能の作成
+# TODO (sumitnai) 6 templateに落としていく
+# TODO (sumitnai) 7 データの取得について考える
+# TODO (sumitnai)    --  ドラマについて
+# TODO (sumitnai)    --  リリース日
+# TODO (sumitnai) -- クーロンで回すツイッターデータ更新用コマンドの作成, twitterapiの上限の使用について
+# TODO (sumitnai) -- グラフ化を考える
+# TODO (sumitnai) -- ユーザ機能を考える
+# TODO (sumitnai) -- apiから出るエラーの時の対応, ログについて
+# TODO (sumitnai) -- 管理画面の修正
+# TODO (sumitnai) -- seleniumを採用するか考える（コメントアウトしている）必要であればrequirements.txtに追加する selenium==3.141.0
+
+
+
+          - for content in dorama
+            .container__info__box #{ forloop.counter }位
+              %br
+              %a{href: '/detail'}
+                %img(src = "#{ content.img_url }")
+              %br
+              %a.dra{href: '/detail'}
+                %p.dra= content.name
+                %p.dra= content.appraise

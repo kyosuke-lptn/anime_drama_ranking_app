@@ -1,46 +1,88 @@
 from django.contrib import admin
+from django.db import models
 
-from .models import Content, Category, TwitterData
+from .models import Content
+from .models import Category
+from .models import TwitterUser
+from .models import TwitterApi
+from .models import Staff
 
 # Register your models here.
 
 
-class TwitterDataInline(admin.StackedInline):
-    model = TwitterData
+class TwitterUserInline(admin.StackedInline):
+    model = TwitterUser
     extra = 0
-    readonly_fields = ('tw_screen_name', 'tw_description', 'content_url',
-                       'profile_image_url_https', 'profile_banner_url',
-                       )
+    readonly_fields = ('name', 'description', 'official_url', 'icon_url',
+                       'banner_url', 'followers_count', 'create_date',
+                       'update_date', 'all_tweet_count', 'all_retweet_count',
+                       'all_favorite_count')
+
+
+class StaffInline(admin.StackedInline):
+    model = Staff
+    extra = 0
 
 
 @admin.register(Content)
 class ContentAdmin(admin.ModelAdmin):
-    list_display = ('content_name', 'get_data')
+    list_display = ('name', 'update_date', 'twitteruser', 'appraise', 'get_tw_user_data')
     fieldsets = [
-        (None, {'fields': ['content_name', 'description',
-                           'maker', 'release_date', 'update_date']}),
-         ('ツイッター集計結果(1ツイートあたり）', {'fields': ['get_data']}),
-    ]
-    readonly_fields = ('get_data', 'update_date')
-    inlines = [TwitterDataInline]
+        (None, {'fields': ['name', 'screen_name', 'description',
+                           ('maker', 'img_url'),
+                           ('release_date', 'update_date')]}),
+        ('カテゴリー', {'fields': ['category']}),
+        ('最新ツイート', {'fields': ['latest_tweet_text', 'latest_tweet_date',
+                               'latest_tweet_create_date']})]
+    readonly_fields = ('update_date', 'latest_tweet_text', 'latest_tweet_date',
+                       'latest_tweet_create_date', 'appraise')
+    inlines = [StaffInline, TwitterUserInline]
 
-    def get_data(self, obj):
-        data_list = [
-            "{} -【いいね】 {}  【リツイート】 {} 【リスト数】{} 【フォロワー数】{} 【ツイート数】{}".format(
-                create_date, data[0], data[1], data[2], data[3], data[4])
-            for (create_date, data) in obj.data().items()
-        ]
-        return "\n".join(data_list)
+    def get_tw_user_data(self, obj):
+        user = obj.twitteruser
+        return f"【いいね平均】{user.favorite_avg():,}" \
+               f"【リツイート平均】{user.retweets_avg():,}" \
+               f"【ツイート合計】{user.all_tweet_count:,}" \
+               f"【フォロワー数】{user.followers_count:,}"
+
+    get_tw_user_data.short_description = 'ツイッター情報'
+
+    def latest_tweet_date(self, obj):
+        return obj.twitteruser.latest_tweet().tweet_date.strftime(
+            '%Y年%m月%d日%H:%M')
+
+    latest_tweet_date.short_description = '最新ツイート日'
+
+    def latest_tweet_text(self, obj):
+        return obj.twitteruser.latest_tweet().text
+
+    latest_tweet_text.short_description = '最新のツイート内容'
+
+    def latest_tweet_create_date(self, obj):
+        create_datetime = obj.twitteruser.latest_tweet().\
+            latest_tweet_count().create_date
+        return create_datetime.strftime('%Y年%m月%d日%H:%M')
+
+    latest_tweet_create_date.short_description = '以前データ取得した日'
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if not obj.has_tweets():
+            api = TwitterApi()
+            api.get_and_store_twitter_data(obj)
 
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    filter_horizontal = ['contents']
-    list_display = ('category_name', 'get_contents')
+    list_display = ('name', 'get_contents')
+    fields = ('name', 'get_contents')
+    readonly_fields = ('get_contents', )
 
     def get_contents(self, obj):
-        if obj.contents.all().exists():
+        if obj.content_set.all().exists():
             return ", ".join(
-                [content.content_name for content in obj.contents.all()])
+                [content.name for content in obj.content_set.all()])
         else:
             return '該当なし'
+
+    get_contents.short_description = 'コンテンツ'

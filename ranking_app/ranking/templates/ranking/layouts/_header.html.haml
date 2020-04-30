@@ -5,8 +5,8 @@
   .header__nav
     %ul
       %li
-        %a{href: '/'} トップ
+        %a{href: "{% url 'ranking:index' %}"} トップ
       %li
-        %a{href: '/animations'} アニメ 
+        %a{href: "{% url 'ranking:category' 1 %}"} アニメ
       %li
         %a{href: '/dramas'} ドラマ
