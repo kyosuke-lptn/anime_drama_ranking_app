@@ -28,9 +28,9 @@
                   %ul 出演声優 ：
                     - for cast in content.performers
                       %li #{ cast.name }(#{ cast.role })
-    .pager
-      - if contents.has_previous
-        %a{href: "?p=#{ contents.previous_page_number }"} 前へ
-      %span #{ contents.number } / #{ contents.paginator.num_pages }
-      - if contents.has_next
-        %a{href: "?p=#{ contents.next_page_number }"} 次へ
+      .pager
+        - if contents.has_previous
+          %a{href: "?p=#{ contents.previous_page_number }"} 前へ
+        %span #{ contents.number } / #{ contents.paginator.num_pages }
+        - if contents.has_next
+          %a{href: "?p=#{ contents.next_page_number }"} 次へ

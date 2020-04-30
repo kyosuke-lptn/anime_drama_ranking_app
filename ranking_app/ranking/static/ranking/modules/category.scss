@@ -130,3 +130,43 @@ hr {
   padding-top: 20px;
   font-family: 'Yu Mincho Light','YuMincho','Yu Mincho','游明朝体';
 }
+
+.pager {
+  text-align: center;
+  font-size: 20px;
+  color: #FFFFF0;
+  font-family: 'Yu Mincho Light','YuMincho','Yu Mincho','游明朝体';
+  height: 60px;
+  a {
+    padding-top: 30px;
+    height: 100%;
+    text-decoration: none;
+    text-align: center;
+    box-sizing: border-box;
+    background-color: rgba(128, 128, 128, 0.377);
+    /* 中央揃え */
+    display: inline-block;
+    margin: 0 auto;
+    /* 幅の指定 */
+    width: 100%;
+    max-width: 200px;
+    padding: 10px;
+    /* 色の指定 */
+    color: #FFFFF0;
+    font-weight: bold;
+    border: 2px solid #FFFFF0;
+    position: relative;
+    overflow: hidden;
+    a:link, a:visited, a:active, a:hover {
+      color: #FFFFF0;
+    }
+  }
+  span {
+    display: inline-block;
+    line-height: 60px;
+    font-size: 25px;
+    width: 100px;
+    vertical-align: top;
+  }
+  clear: both;
+}
