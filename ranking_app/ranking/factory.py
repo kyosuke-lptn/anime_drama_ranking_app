@@ -21,7 +21,7 @@ class ContentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Content
 
-    name = factory.Faker('word', locale='ja')
+    name = factory.Sequence(lambda n: "Content name %03d" % n)
     description = factory.Faker('sentence', nb_words=20, locale='ja')
     release_date = factory.Faker('date_time_ad',
                                  tzinfo=JA_TZ,

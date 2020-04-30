@@ -77,6 +77,9 @@ class Content(models.Model):
                               reverse=True)
         return [content_tuple[0] for content_tuple in score_sorted]
 
+    def performers(self):
+        return self.staff_set.filter(is_cast=True)
+
 
 class Staff(models.Model):
     name = models.CharField(max_length=50, db_index=True)
