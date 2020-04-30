@@ -15,7 +15,7 @@
       - for content in contents
         .box
           .category__box
-            %a{href: '/detail'}
+            %a{href: "{% url 'ranking:content_detail' content.id %}"}
             .category__box__title
               %h2 &emsp;&nbsp;{{ content.name }}
             .category__box__media
@@ -27,11 +27,11 @@
                   %hr
                 .category__box__media__info__synopsis
                   %p
-                  = content.description|default:""
+                  = content.description|default:""|truncatechars_html:180
                   %hr
                 .category__box__media__info__cast
-                  %ul 出演声優 ：
-                    - for cast in content.performers
+                  %ul キャスト ：
+                    - for cast in content.main_performers
                       %li #{ cast.name }(#{ cast.role })
     .pager
       - if contents.has_previous

@@ -1,7 +1,4 @@
-from django.core.paginator import Paginator
-from django.http import HttpResponse
 from django.shortcuts import render
-from django.template import loader
 from django.views import View
 from django.views.generic import TemplateView
 
@@ -19,7 +16,7 @@ class IndexView(TemplateView):
 DISPLAY_NUMBER = 15
 
 
-class CategoryView(View):
+class CategoryIndexView(View):
     def get(self, request, category_id, *args, **kwargs):
         category = Category.objects.get(id=category_id)
         all_contents = Content.sort_twitter_rating_by(category)
@@ -31,17 +28,15 @@ class CategoryView(View):
         return render(request, 'ranking/category.html.haml', context)
 
 
-index_view = IndexView.as_view()
-category_view = CategoryView.as_view()
+class ContentDetailView(View):
+    def get(self, request, content_id, *args, **kwargs):
+        content = Content.objects.get(pk=content_id)
+        context = {
+            'content': content,
+        }
+        return render(request, 'ranking/content_detail.html.haml', context)
 
-def animation(request):
-    template = loader.get_template('ranking/category.html.haml')
-    return HttpResponse(template.render())
 
-def drama(request):
-    template = loader.get_template('ranking/dramas.html.haml')
-    return HttpResponse(template.render())
-
-def show(request):
-    template = loader.get_template('ranking/detail.html.haml')
-    return HttpResponse(template.render())
+index = IndexView.as_view()
+category_index = CategoryIndexView.as_view()
+content_detail = ContentDetailView.as_view()

@@ -87,8 +87,14 @@ class Content(models.Model):
                               reverse=True)
         return [content_tuple[0] for content_tuple in score_sorted]
 
+    def main_performers(self):
+        return self.staff_set.filter(is_cast=True)[:4]
+
     def performers(self):
         return self.staff_set.filter(is_cast=True)
+
+    def only_staff(self):
+        return self.staff_set.filter(is_cast=False)
 
 
 class Staff(models.Model):

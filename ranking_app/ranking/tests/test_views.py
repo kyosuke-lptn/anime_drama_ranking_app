@@ -6,6 +6,7 @@ from ..factory import ContentFactory
 from ..factory import TwitterUserFactory
 from ..factory import TweetFactory
 from ..factory import TweetCountFactory
+from ..factory import StaffFactory
 from ..models import Content
 
 
@@ -66,4 +67,33 @@ class CategoryViewTests(TestCase):
                     self.assertContains(response, cast.role)
             self.assertNotContains(response, contents[stop])
             self.assertContains(response, '美しい世界は')
+
+
+class ContentDetailViewTests(TestCase):
+
+    def test_works_fine(self):
+        anime = CategoryFactory(name='アニメ')
+        content = create_content_with_data(anime)
+        cast = StaffFactory(is_cast=True, content=content)
+        staff = StaffFactory(is_cast=False, content=content)
+
+        response = self.client.get(
+            reverse('ranking:content_detail', args=[content.id]))
+
+        self.assertContains(response, content.name)
+        self.assertContains(response, content.img_url)
+        self.assertContains(response, content.screen_name)
+        self.assertContains(response, content.description)
+        self.assertContains(response, content.maker)
+        # TODO release_dateの表示を設定する
+        # self.assertContains(response, content.release_date)
+        self.assertContains(response, content.twitteruser.followers_count)
+        self.assertContains(response, content.twitteruser.all_tweet_count)
+        self.assertContains(response, content.twitteruser.favorite_avg())
+        self.assertContains(response, content.twitteruser.retweets_avg())
+        self.assertContains(response, content.twitteruser.official_url)
+        self.assertContains(response, cast.name)
+        self.assertContains(response, cast.role)
+        self.assertContains(response, staff.name)
+        self.assertContains(response, staff.role)
 

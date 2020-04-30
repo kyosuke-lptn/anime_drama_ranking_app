@@ -3,47 +3,43 @@
 - block main
   .movies__detail
     %section.detail__head
-      %h1 タイトルタイトルタイトル
+      %h1= content.name
       .detail__head__table
         .detail__head__table__media
-          %img(src = "/static/ranking/images/ani-sample1.jpg")
+          %img(src = "#{ content.img_url }")
         .detail__head__table__graph
           %img(src = "/static/ranking/images/graph-sample.jpg")
     %section.detail__body
       .detail__body__info
         %h2.subtitle Twitterデータ
         %ul.total
-          %li フォロー数 :
-          %li フォロワー数 :
-          %li ツイート数 :
+          %li フォロワー数 : #{ content.twitteruser.followers_count }
+          %li ツイート数 : #{ content.twitteruser.all_tweet_count }
         %ul.ave
-          %li 平均いいね数 :
-          %li 平均リツイート数 :
-          %li 
+          %li 平均いいね数 : #{ content.twitteruser.favorite_avg }
+          %li 平均リツイート数 : #{ content.twitteruser.retweets_avg }
       %hr
       .detail__body__synopsis
         %h2.subtitle あらすじ
         %p.detail__body__synopsis__text
-          これはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじですこれはあらすじです
+        = content.description|default:""
       %hr
       .detail__body__staff
         .detail__body__staff__cast
           %h2.subtitle キャスト
           %ul.detail__body__staff__cast__list
-            %li ハゲ役：ハゲ
-            %li ハゲハゲ
-            %li ハゲハゲハゲ
+            - for cast in content.performers
+              %li #{ cast.role }役： #{ cast.name }
         .detail__body__staff__behind
           %h2.subtitle スタッフ
           %ul
-            %li 新ペー
-            %li 真ペー
-            %li 信ペー
+            - for cast in content.only_staff
+              %li #{ cast.role }： #{ cast.name }
       %hr
       .detail__body__data
           .detail__body__data__production
             %h2.subtitle 制作会社
-            %p 京アニ
+            %p #{ content.maker }
         /.detail__body__data__music
           %h2.subtitle 音楽
           %ul
@@ -52,13 +48,14 @@
             %li　Insert : Good News
         .detail__body__data__date
           %h2.subtitle　放送日
-          %p 2020/01/01
+          %p #{ content.release_date }
       %hr
       .detail__body__official
         .detail__body__official__web
           %h2.subtitle　公式サイト
-          %a http://hage.net/
+          %a{href: "#{ content.twitteruser.official_url }"}
+            = content.twitteruser.official_url
         .detail__body__official__twitter
           %h2.subtitle　公式ツイッター
-          %a !!hagetter!!
+          %a{href: "https://twitter.com/#{ content.screen_name }"} @#{ content.screen_name }
 
