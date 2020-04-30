@@ -12,13 +12,14 @@
           .category__box
             %a{href: '/detail'}
             .category__box__title
-              %h2 &emsp;&nbsp;{{ content.name }}
+              %h2 1
+              %h3 {{ content.name }}
             .category__box__media
               .category__box__media__image
                 %img(src = "#{ content.img_url }")
               .category__box__media__info
-                .category__box__media__info__genre
-                  %p ジャンル ： ラブコメ
+                .category__box__media__info__point
+                  %p #{content.appraise} PT
                   %hr
                 .category__box__media__info__synopsis
                   %p
@@ -31,6 +32,10 @@
       .pager
         - if contents.has_previous
           %a{href: "?p=#{ contents.previous_page_number }"} 前へ
-        %span #{ contents.number } / #{ contents.paginator.num_pages }
+        %span 1
+        %span 2
+        %span 3
+        %span 4
+        %span 5
         - if contents.has_next
           %a{href: "?p=#{ contents.next_page_number }"} 次へ
