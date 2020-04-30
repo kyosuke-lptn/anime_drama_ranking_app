@@ -3,9 +3,14 @@
 - block main
   .category
     .category__image
-      %p.first 美しい世界は
-      %p.second 画面の先にあった
-      %p.third 
+      - if category.name == 'アニメ'
+        %p.first 美しい世界は
+        %p.second 画面の先にあった
+        %p.third
+      - elif category.name == 'ドラマ'
+        %p.first 青春も、
+        %p.second コメディも、
+        %p.third ロマンスも、
     .wrap
       - for content in contents
         .box

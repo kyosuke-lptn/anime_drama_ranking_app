@@ -12,7 +12,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--anime', action='store_true', default=False,
                             help='アニメ情報を取得します。')
-        parser.add_argument('--dorama', action='store_true', default=False,
+        parser.add_argument('--drama', action='store_true', default=False,
                             help='ドラマ情報を取得します。')
 
     def handle(self, *args, **options):
@@ -27,5 +27,5 @@ class Command(BaseCommand):
                 print('モデルを作成しました。')
             else:
                 print('スクレイピングが失敗しました。コードを見直してください。')
-        if options['dorama']:
+        if options['drama']:
             print('あとで実装します。。')

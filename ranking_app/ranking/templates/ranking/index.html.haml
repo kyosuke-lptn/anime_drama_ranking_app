@@ -6,30 +6,35 @@
       %p.saisho 日本の心を
       %p.ato あなたの生活に
     .container__info
-      %section.ani
-        %p.container__info__ani
-          %a.topic1{href: '/animations'} アニメ
-          - for content in anime
-            .container__info__box #{ forloop.counter }位
-              %br
-              %a{href: '/detail'}
-                %img(src = "#{ content.img_url }")
-              %br
-              %a.ani{href: '/detail'}
-                %p= content.name
-                %p= content.appraise
-      %section.dra
-        %p.container__info__dra
-          %a.topic2{href: '/dramas'} ドラマ
-          - for content in dorama
-            .container__info__box #{ forloop.counter }位
-              %br
-              %a{href: '/detail'}
-                %img(src = "#{ content.img_url }")
-              %br
-              %a.dra{href: '/detail'}
-                %p.dra= content.name
-                %p.dra= content.appraise
+      - for category in categories
+        - if category.name == 'アニメ'
+          %section.ani
+            %p.container__info__ani
+              %a.topic1{href: "{% url 'ranking:category' category.id %}"}
+                = category.name
+              - for content in category.has_high_rank_content_sort_by_twitter_data
+                .container__info__box #{ forloop.counter }位
+                  %br
+                  %a{href: '/detail'}
+                    %img(src = "#{ content.img_url }")
+                  %br
+                  %a.ani{href: '/detail'}
+                    %p= content.name
+                    %p= content.appraise
+        - elif category.name == 'ドラマ'
+          %section.dra
+            %p.container__info__dra
+              %a.topic2{href: "{% url 'ranking:category' category.id %}"}
+                = category.name
+              - for content in category.has_high_rank_content_sort_by_twitter_data
+                .container__info__box #{ forloop.counter }位
+                  %br
+                  %a{href: '/detail'}
+                    %img(src = "#{ content.img_url }")
+                  %br
+                  %a.dra{href: '/detail'}
+                    %p.dra= content.name
+                    %p.dra= content.appraise
       %section.about
         %p.container__info__about このサイトについて
           %dd アニメ及びドラマの公式ツイッターから取得した情報を総合的に評価し、ランキング形式で紹介しています。

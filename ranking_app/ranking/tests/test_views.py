@@ -24,21 +24,28 @@ def create_content_with_data(category, name=None, retweet=None):
 
 
 class RankingIndexViewTests(TestCase):
-    def test_displayed_correctly(self):
+
+    def test_display_only_high_rank_content(self):
         anime = CategoryFactory(name='アニメ')
         CategoryFactory(name='ドラマ')
-        content = create_content_with_data(anime, 'most popular', 100)
+        contents = []
+        for num in range(5):
+            contents.append(
+                create_content_with_data(anime, 'most popular{}'.format(num),
+                                         100 - num))
+        for num in range(50):
+            create_content_with_data(anime, 'Not popular{}'.format(num), num)
 
         response = self.client.get(reverse('ranking:index'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, content.name)
-        self.assertQuerysetEqual(response.context['anime'],
-                                 ['<Content: most popular>'])
+        for content in contents:
+            self.assertContains(response, content.name)
+        self.assertNotContains(response, "Not popular")
 
 
 class CategoryViewTests(TestCase):
 
-    def test_paging(self):
+    def test_anime_category(self):
         anime = CategoryFactory(name='アニメ')
         for _ in range(30):
             create_content_with_data(anime)
@@ -53,5 +60,10 @@ class CategoryViewTests(TestCase):
             start = stop - 15
             for ranking_content in contents[start:stop]:
                 self.assertContains(response, ranking_content.name)
-                self.assertNotContains(response, contents[stop])
+                self.assertContains(response, ranking_content.img_url)
+                for cast in ranking_content.performers():
+                    self.assertContains(response, cast.name)
+                    self.assertContains(response, cast.role)
+            self.assertNotContains(response, contents[stop])
+            self.assertContains(response, '美しい世界は')
 

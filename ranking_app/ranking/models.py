@@ -16,10 +16,15 @@ import urllib3
 
 # Create your models here.
 
+HIGH_RANK_CONTENT = 5
+
 
 class Category(models.Model):
     name = models.CharField('カテゴリー名', max_length=50, unique=True,
                             db_index=True)
+
+    def has_high_rank_content_sort_by_twitter_data(self):
+        return Content.sort_twitter_rating_by(self)[:HIGH_RANK_CONTENT]
 
     def __str__(self):
         return self.name
@@ -65,14 +70,19 @@ class Content(models.Model):
             return 0
 
     @classmethod
-    def sort_twitter_rating_by(cls, category):
+    def sort_twitter_rating_by(cls, category=None):
         """
         カテゴリーに含まれるツイッター評価値順にソートしたコンテンツを返す
         :return: tuple in list
         """
-        contents = {
-            content: content.appraise()
-            for content in cls.objects.filter(category=category)}
+        if category:
+            contents = {
+                content: content.appraise()
+                for content in cls.objects.filter(category=category)}
+        else:
+            contents = {
+                content: content.appraise()
+                for content in cls.objects.all()}
         score_sorted = sorted(contents.items(), key=lambda x: x[1],
                               reverse=True)
         return [content_tuple[0] for content_tuple in score_sorted]
