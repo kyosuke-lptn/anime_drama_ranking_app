@@ -263,13 +263,46 @@ class WebScrapingModelTests(TestCase):
         get_anime_dataメソッドをテストするためのメソッド。テスト用に少し変更しています。
         """
         scraping = ScrapingContent()
-        scraping.contents_data = scraping.extra_data_from('test')
-        scraping.store_contents_data(category)
+        scraping.contents_data = scraping.extra_anime_data_from('test')
+        scraping.store_contents_data(category, anime=True)
 
-    @mock.patch('ranking.models.ScrapingContent.extra_data_from')
-    def test_store_contents_data(self, mock_contents_data):
+    @staticmethod
+    def get_drama_data(category):
+        """
+        get_drama_dataメソッドをテストするためのメソッド。テスト用に少し変更しています。
+        """
+        scraping = ScrapingContent()
+        scraping.contents_data = scraping.combine('test', 'test')
+        scraping.store_contents_data(category, drama=True)
+
+    @mock.patch('ranking.models.ScrapingContent.combine')
+    def test_store_drama_data(self, mock_combine):
         test_data = [
             {'name': 'サンプルドラマ',
+             'description': '詳細について',
+             'cast': ['主人公:田中太郎', 'ヒロイン:はげ'],
+             'official_url': 'http://sample.com/aniani/',
+             'maker': 'A制作会社',
+             'staff': ['監督:鈴木次郎', '音声:別所誠人', 'プロデューサ:炭谷'],
+             'img_url': 'https://sample.com/image/2222',
+             'screen_name': 'test_name'}]
+        mock_combine.return_value = test_data
+
+        category = factory.CategoryFactory(name='ドラマ')
+        self.get_drama_data(category)
+
+        content = Content.objects.get(name='サンプルドラマ')
+        self.assertEqual(content.description, test_data[0]['description'])
+        self.assertEqual(content.maker, test_data[0]['maker'])
+        self.assertEqual(content.screen_name, test_data[0]['screen_name'])
+        self.assertEqual(content.category, category)
+        self.assertEqual(content.performers().count(), 2)
+        self.assertEqual(content.only_staff().count(), 3)
+
+    @mock.patch('ranking.models.ScrapingContent.extra_anime_data_from')
+    def test_store_anime_data(self, mock_contents_data):
+        test_data = [
+            {'name': 'サンプルアニメ',
              'description': '詳細について',
              'cast': ['主人公：田中太郎', 'ヒロイン：はげ'],
              'official_url': 'http://sample.com/aniani/',
@@ -289,7 +322,7 @@ class WebScrapingModelTests(TestCase):
         self.assertEqual(content.category, category)
         self.assertEqual(content.staff_set.all().count(), 5)
 
-    @mock.patch('ranking.models.ScrapingContent.extra_data_from')
+    @mock.patch('ranking.models.ScrapingContent.extra_anime_data_from')
     def test_store_contents_data_with_little_data(self, mock_contents_data):
         little_data = [{'name': 'サンプルドラマ'}]
         mock_contents_data.return_value = little_data
@@ -304,7 +337,7 @@ class WebScrapingModelTests(TestCase):
         self.assertEqual(content.category, category)
         self.assertEqual(content.staff_set.all().count(), 0)
 
-    @mock.patch('ranking.models.ScrapingContent.extra_data_from')
+    @mock.patch('ranking.models.ScrapingContent.extra_anime_data_from')
     def test_store_contents_data_without_data(self, mock_contents_data):
         mock_contents_data.return_value = []
 

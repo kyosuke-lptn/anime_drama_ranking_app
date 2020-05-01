@@ -35,8 +35,6 @@ favorite_count
 ＊評価について
 （いいねx1 ＋ リツイートx2）/100
 
-# TODO (sumitnai) 3 ランキング機能の作成
-# TODO (sumitnai) 6 templateに落としていく
 # TODO (sumitnai) 7 データの取得について考える
 # TODO (sumitnai)    --  ドラマについて
 # TODO (sumitnai)    --  リリース日
@@ -47,14 +45,3 @@ favorite_count
 # TODO (sumitnai) -- 管理画面の修正
 # TODO (sumitnai) -- seleniumを採用するか考える（コメントアウトしている）必要であればrequirements.txtに追加する selenium==3.141.0
 
-
-
-          - for content in dorama
-            .container__info__box #{ forloop.counter }位
-              %br
-              %a{href: '/detail'}
-                %img(src = "#{ content.img_url }")
-              %br
-              %a.dra{href: '/detail'}
-                %p.dra= content.name
-                %p.dra= content.appraise
