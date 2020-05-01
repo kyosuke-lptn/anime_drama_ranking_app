@@ -91,6 +91,11 @@ class Content(models.Model):
             ranking += 1
         return sort_result
 
+    def rank(self):
+        sort_contents = Content.sort_twitter_rating_by(self.category)
+        rank_list = [info['content'] for info in sort_contents]
+        return rank_list.index(self) + 1
+
     def main_performers(self):
         return self.staff_set.filter(is_cast=True)[:4]
 
@@ -350,6 +355,7 @@ DRAMA_PART1_DOMAIN = 'https://thetv.jp'
 DRAMA_PART1_PATH = "/program/selection/316/"
 DRAMA_PART2_DOMAIN = "https://drama-circle.com/"
 EXCLUSION_LIST = ['share', 'bs7ch_pr', 'tvtokyo_pr', 'intent', 'search']
+EXCLUSION_ANIME_IMG = ["https://eiga.k-img.com/anime/images/shared/noimg/320.png?1484793255"]
 
 
 class ScrapingContent(object):
@@ -562,7 +568,10 @@ class ScrapingContent(object):
                     staff_list = [item.text for item in staff.find_all('li')]
                     content_dict['staff'] = staff_list
                 if img_data:
-                    content_dict['img_url'] = img_data['src']
+                    if img_data['src'] in EXCLUSION_ANIME_IMG:
+                        content_dict['img_url'] = None
+                    else:
+                        content_dict['img_url'] = img_data['src']
                 if screen_name:
                     content_dict['screen_name'] = screen_name
 

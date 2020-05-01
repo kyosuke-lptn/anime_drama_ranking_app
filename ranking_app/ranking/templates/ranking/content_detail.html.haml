@@ -4,16 +4,22 @@
   .movies__detail
     %section.detail__head
       .detail__head__top
-        %p.rank 1
+        %p.rank #{ content.rank }
         %h1= content.name
         %p.appraise #{ content.appraise } PT
       .detail__head__table
         .detail__head__table__media
-          %img(src = "#{ content.img_url }")
+          - if content.img_url
+            %img(src = "#{ content.img_url }")
+          - else
+            %img(src = '/static/ranking/images/noimage.jpg')
     %section.detail__body
       .detail__body__info
         .detail__body__info__tag
-          %img(src = "#{ content.twitteruser.icon_url }")
+          - if content.twitteruser.icon_url
+            %img(src = "#{ content.twitteruser.icon_url }")
+          - else
+            %img(src = '/static/ranking/images/noimage.jpg')
           %h2.subtitle Twitterデータ
         .detail__body__info__list
           %ul
@@ -22,7 +28,7 @@
             %li 平均いいね数 : #{ content.twitteruser.favorite_avg }
             %li 平均リツイート数 : #{ content.twitteruser.retweets_avg }
         .detail__body__info__graph
-          %img(src = "/static/ranking/images/graph-sample.jpg")
+          %img(src = "/static/ranking/images/noimage.jpg'")
       %hr
       .detail__body__synopsis
         %h2.subtitle あらすじ

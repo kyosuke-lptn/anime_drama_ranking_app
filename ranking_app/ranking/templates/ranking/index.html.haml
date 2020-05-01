@@ -18,7 +18,10 @@
                   %p.appraise [#{content_info.points} PT]
                   %br
                   %a{href: "{% url 'ranking:content_detail' content_info.content.id %}"}
-                    %img(src = "#{ content_info.content.img_url }")
+                    - if content_info.content.img_url
+                      %img(src = "#{ content_info.content.img_url }")
+                    - else
+                      %img.dra(src = '/static/ranking/images/noimage.jpg')
                   %br
                   %a.ani{href: "{% url 'ranking:content_detail' content_info.content.id %}"}
                     %p= content_info.content.name
@@ -33,7 +36,10 @@
                   %p.dappraise [#{content_info.points} PT]
                   %br
                   %a{href: "{% url 'ranking:content_detail' content_info.content.id %}"}
-                    %img.dra(src = "#{ content_info.content.img_url }")
+                    - if content_info.content.img_url
+                      %img.dra(src = "#{ content_info.content.img_url }")
+                    - else
+                      %img.dra(src = '/static/ranking/images/noimage.jpg')
                   %br
                   %a.dra{href: "{% url 'ranking:content_detail' content_info.content.id %}"}
                     %p.dra= content_info.content.name
