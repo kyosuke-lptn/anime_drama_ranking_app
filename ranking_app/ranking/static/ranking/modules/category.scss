@@ -31,6 +31,7 @@
     margin: 50px 0;
     position: relative;
     background-color: rgba(128, 128, 128, 0.63);
+    z-index: 5;
     a {
       display: block;
       position: absolute;
@@ -59,11 +60,14 @@
       margin-top: 20px;
       color: #FFFFF0;
       width: 100%;
-      img {
-        height: 200px;
-        width: auto;
-        float: left;
-        margin-right: 15px;
+      height: 100%;
+      &__image {
+        img {
+          height: 200px;
+          width: auto;
+          float: left;
+          margin-right: 15px;
+        }
       }
       &__info {
         font-size: 15px;
@@ -174,24 +178,11 @@ hr {
       background-color: rgba(43, 39, 39, 0.829);
   }
   span {
-    display: inline-block;
-    line-height: 56px;
-    font-size: 25px;
-    width: 60px;
-    vertical-align: top;
-    text-align: center;
-    box-sizing: border-box;
-    background-color: rgba(128, 128, 128, 0.377);
-    /* 中央揃え */
-    display: inline-block;
-    margin: 0 auto;color: #FFFFF0;
-    font-weight: bold;
-    border: 2px solid #FFFFF0;
-    position: relative;
-    overflow: hidden;
-    margin: 0 5px;
+    a.pager {
+      width: 60px;
+    }
   }
-  span:hover {
+  a:hover {
     background-color: rgba(43, 39, 39, 0.829);
   }
   clear: both;

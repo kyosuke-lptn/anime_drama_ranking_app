@@ -28,14 +28,14 @@
               %a.topic2{href: "{% url 'ranking:category' category.id %}"}
                 = category.name
               - for content_info in category.has_high_rank_content_sort_by_twitter_data
-                .container__info__box
-                  %p.rank #{ content_info.rank }
-                  %p.appraise [#{content_info.points} PT]
+                .container__info__box.drabox
+                  %p.drank #{ content_info.rank }
+                  %p.dappraise [#{content_info.points} PT]
                   %br
                   %a{href: "{% url 'ranking:content_detail' content_info.content.id %}"}
-                    %img(src = "#{ content_info.content.img_url }")
+                    %img.dra(src = "#{ content_info.content.img_url }")
                   %br
-                  %a.ani{href: "{% url 'ranking:content_detail' content_info.content.id %}"}
+                  %a.dra{href: "{% url 'ranking:content_detail' content_info.content.id %}"}
                     %p.dra= content_info.content.name
       %section.about
         %p.container__info__about このサイトについて
