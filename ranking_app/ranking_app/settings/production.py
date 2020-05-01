@@ -60,6 +60,12 @@ MIDDLEWARE = [
     'ranking.middleware.InitCreateCategoryMiddleware',
 ]
 
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 # TODO (sumitani) 本番環境でのLOG設定を追加する
 
 # TODO (sumitani) staticファイルを配信する時に本番環境では、プロキシサーバなどに配置するように設定する
