@@ -86,7 +86,8 @@ class ContentModelTests(TestCase):
         dorama_content = self.create_content_twitter_tweet_tweetcount(
             dorama_category)
 
-        sort_contents = Content.sort_twitter_rating_by(anime_category)
+        sort_info = Content.sort_twitter_rating_by(anime_category)
+        sort_contents = [info['content'] for info in sort_info]
         self.assertEqual([content, low_content], sort_contents)
         self.assertNotIn(dorama_content, sort_contents)
         self.assertEqual(low_content, sort_contents[-1])

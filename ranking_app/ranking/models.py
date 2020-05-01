@@ -71,7 +71,7 @@ class Content(models.Model):
     def sort_twitter_rating_by(cls, category=None):
         """
         カテゴリーに含まれるツイッター評価値順にソートしたコンテンツを返す
-        :return: tuple in list
+        :return list: [{'rank': int(順位), 'content': cls(content), 'points': int(ポイント)}, ..]
         """
         if category:
             contents = {
@@ -83,7 +83,13 @@ class Content(models.Model):
                 for content in cls.objects.all()}
         score_sorted = sorted(contents.items(), key=lambda x: x[1],
                               reverse=True)
-        return [content_tuple[0] for content_tuple in score_sorted]
+        ranking, sort_result = 1, []
+        for content_tuple in score_sorted:
+            content_data = {'rank': ranking, 'content': content_tuple[0],
+                            'points': content_tuple[1]}
+            sort_result.append(content_data)
+            ranking += 1
+        return sort_result
 
     def main_performers(self):
         return self.staff_set.filter(is_cast=True)[:4]

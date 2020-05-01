@@ -12,31 +12,31 @@
             %p.container__info__ani
               %a.topic1{href: "{% url 'ranking:category' category.id %}"}
                 = category.name
-              - for content in category.has_high_rank_content_sort_by_twitter_data
+              - for content_info in category.has_high_rank_content_sort_by_twitter_data
                 .container__info__box
-                  %p.rank #{ forloop.counter }
-                  %p.appraise [#{content.appraise} PT]
+                  %p.rank #{ content_info.rank }
+                  %p.appraise [#{content_info.points} PT]
                   %br
-                  %a{href: "{% url 'ranking:content_detail' content.id %}"}
-                    %img(src = "#{ content.img_url }")
+                  %a{href: "{% url 'ranking:content_detail' content_info.content.id %}"}
+                    %img(src = "#{ content_info.content.img_url }")
                   %br
-                  %a.ani{href: "{% url 'ranking:content_detail' content.id %}"}
-                    %p= content.name
+                  %a.ani{href: "{% url 'ranking:content_detail' content_info.content.id %}"}
+                    %p= content_info.content.name
         - elif category.name == 'ドラマ'
           %section.dra
             %p.container__info__dra
               %a.topic2{href: "{% url 'ranking:category' category.id %}"}
                 = category.name
-              - for content in category.has_high_rank_content_sort_by_twitter_data
-                .container__info__box #{ forloop.counter }位
-                  %p.dra= content.appraise
+              - for content_info in category.has_high_rank_content_sort_by_twitter_data
+                .container__info__box
+                  %p.rank #{ content_info.rank }
+                  %p.appraise [#{content_info.points} PT]
                   %br
-                  %a{href: "{% url 'ranking:content_detail' content.id %}"}
-                    %img(src = "#{ content.img_url }")
+                  %a{href: "{% url 'ranking:content_detail' content_info.content.id %}"}
+                    %img(src = "#{ content_info.content.img_url }")
                   %br
-                  %a.ani{href: "{% url 'ranking:content_detail' content.id %}"}
-                    %p.dra= content.name
-                    %p.dra= content.appraise
+                  %a.ani{href: "{% url 'ranking:content_detail' content_info.content.id %}"}
+                    %p.dra= content_info.content.name
       %section.about
         %p.container__info__about このサイトについて
           %dd アニメ及びドラマの公式ツイッターから取得した情報を総合的に評価し、ランキング形式で紹介しています。

@@ -20,10 +20,10 @@ class CategoryIndexView(View):
     def get(self, request, category_id, *args, **kwargs):
         category = Category.objects.get(id=category_id)
         all_contents = Content.sort_twitter_rating_by(category)
-        contents = paging(request, all_contents, DISPLAY_NUMBER)
+        contents_info = paging(request, all_contents, DISPLAY_NUMBER)
         context = {
             'category': category,
-            'contents': contents,
+            'contents_info': contents_info,
         }
         return render(request, 'ranking/category.html.haml', context)
 

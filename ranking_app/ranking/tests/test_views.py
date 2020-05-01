@@ -51,7 +51,8 @@ class CategoryViewTests(TestCase):
         for _ in range(30):
             create_content_with_data(anime)
 
-        contents = Content.sort_twitter_rating_by(anime)
+        sort_info = Content.sort_twitter_rating_by(anime)
+        contents = [info['content'] for info in sort_info]
         for page in range(2):
             response = self.client.get(
                 "".join([reverse('ranking:category', args=[anime.id]),

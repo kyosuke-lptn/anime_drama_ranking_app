@@ -12,42 +12,33 @@
         %p.second コメディも、
         %p.third ロマンスも、
     .wrap
-      - for content in contents
+      - for info in contents_info
         .box
           .category__box
-            %a{href: "{% url 'ranking:content_detail' content.id %}"}
+            %a{href: "{% url 'ranking:content_detail' info.content.id %}"}
             .category__box__title
-              %h2 1
-              %h3 {{ content.name }}
+              %h2 #{ info.rank }
+              %h3 &nbsp;&nbsp;#{ info.content.name }
             .category__box__media
               .category__box__media__image
-                %img(src = "#{ content.img_url }")
+                %img(src = "#{ info.content.img_url }")
               .category__box__media__info
                 .category__box__media__info__point
-                  %p #{content.appraise} PT
+                  %p #{info.points} PT
                   %hr
                 .category__box__media__info__synopsis
                   %p
-                  = content.description|default:""|truncatechars_html:180
+                  = info.content.description|default:""|truncatechars_html:180
                   %hr
                 .category__box__media__info__cast
                   %ul キャスト ：
-                    - for cast in content.main_performers
+                    - for cast in info.content.main_performers
                       %li #{ cast.name }(#{ cast.role })
       .pager
-        - if contents.has_previous
-          %a{href: "?p=#{ contents.previous_page_number }"} 前へ
-        %span 1
-        %span 2
-        %span 3
-        %span 4
-        %span 5
-        - if contents.has_next
-          %a{href: "?p=#{ contents.next_page_number }"} 次へ
-
-    .pager
-      - if contents.has_previous
-        %a{href: "?p=#{ contents.previous_page_number }"} 前へ
-      %span #{ contents.number } / #{ contents.paginator.num_pages }
-      - if contents.has_next
-        %a{href: "?p=#{ contents.next_page_number }"} 次へ
+        - if contents_info.has_previous
+          %a{href: "?p=#{ contents_info.previous_page_number }"} 前へ
+        - for page in contents_info.paginator.page_range
+          %span
+            %a{href: "?p=#{page}"}= page
+        - if contents_info.has_next
+          %a{href: "?p=#{ contents_info.next_page_number }"} 次へ
