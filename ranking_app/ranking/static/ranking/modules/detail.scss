@@ -9,8 +9,30 @@
   .detail__head {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.500);
-    h1 {
-      font-size: 30px;
+    &__top {
+      text-align: center;
+      p.rank {
+        display: inline;
+        background: #cd5e3cea;
+        border-radius: 50%;
+        color: #fff;
+        font-size: 25px;
+        line-height: 1;
+        padding: 6px 14px;
+        margin-left: 5px;
+      }
+      h1 {
+        display: inline-block;
+        font-size: 30px;
+        margin-left: 5px;
+      }
+      p.appraise {
+        display: inline-block;
+        margin-left: 20px;
+        font-size: 25px;
+        text-decoration: underline;
+        font-weight: bolder;
+      }
     }
   }
   .detail__head__table {
@@ -20,24 +42,11 @@
     display: inline-block;
     vertical-align: bottom;
     &__media {
-      float: left;
       height: 100%;
-      width: 35%;
+      text-align: center;
       img {
         height: 300px;
         width: auto;
-      }
-    }
-    &__data {
-      float: right;
-      height: 100%;
-      width: 65%;
-      img {
-        height: 260px;
-        width: auto;
-      }
-      p {
-        font-size: 30px;
       }
     }
   }
@@ -54,18 +63,40 @@
       height: auto;
       display: inline-block;
       margin: 10px 0;
-      .total {
+      &__tag {
+        h2 {
+          margin: 5px 0 0 10px;
+          display: inline-block;
+          vertical-align: top;
+        }
+        img {
+          border-radius: 50%;
+        }
+      }
+      &__list {
+        height: 100%;
+        width: 30%;
         float: left;
-        width: 50%;
-        height: 100%;
+        line-height: 3;
+        ul {
+          vertical-align: middle;
+        }
+        li {
+          margin-top: 5px;
+        }
       }
-      .ave {
-        float: right;
-        width: 50%;
+      &__graph {
         height: 100%;
-      }
-      li {
-        margin-top: 5px;
+        width: 70%;
+        display: inline-block;
+        text-align: center;
+        img {
+          height: 260px;
+          width: auto;
+        }
+        p {
+          font-size: 30px;
+        }
       }
     }
     &__synopsis {
@@ -121,11 +152,25 @@
         float: left;
         width: 50%;
         height: 100%;
+        a:link, a:visited, a:active {
+          text-decoration: none;
+          color: #FFFFF0
+        }
+        a:hover {
+          text-decoration: underline;
+        }
       }
       &__twitter {
         float: right;
         width: 50%;
         height: 100%;
+        a:link, a:visited, a:active {
+          text-decoration: none;
+          color: #FFFFF0
+        }
+        a:hover {
+          text-decoration: underline;
+        }
       }
     }
   }

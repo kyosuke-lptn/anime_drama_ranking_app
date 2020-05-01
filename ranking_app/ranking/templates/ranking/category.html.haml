@@ -39,6 +39,6 @@
           %a{href: "?p=#{ contents_info.previous_page_number }"} 前へ
         - for page in contents_info.paginator.page_range
           %span
-            %a{href: "?p=#{page}"}= page
+            %a.pager{href: "?p=#{page}"}= page
         - if contents_info.has_next
           %a{href: "?p=#{ contents_info.next_page_number }"} 次へ

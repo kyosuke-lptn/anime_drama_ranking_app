@@ -104,12 +104,12 @@
     color: #FFFFF0;
   }
   a.dra:hover {
-    text-decoration:underline;
+    text-decoration: underline #FFFFF0;
   }
   img {
     height: 200px;
     width: auto;
-    z-index: 5;
+    z-index: 8;
   }
   img:hover {
     box-shadow: 10px 10px 10px rgba(0,0,0,0.5);
@@ -161,9 +161,46 @@ section.dra {
   }
 }
 
+p.drank {
+  display: inline;
+  background: #cd5e3cea;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  padding: 6px 10px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+}
+
+p.dappraise {
+  display: inline-block;
+  font-size: 20px;
+  padding-left: 40px;
+  margin-bottom: 10px;
+  color: #FFFFF0;
+}
+.drabox {
+  display: inline-block;
+  font-family: "Sawarabi Mincho";
+  height: 320px;
+  width: 15%;
+  line-height: 25px;
+  font-size: 20px;
+  vertical-align: top;
+  margin: 20px 15px 0 15px;
+  position: relative;
+  transition-duration: 0.5s;
+  img.dra {
+    height: auto;
+    width: 200px;
+  }
+}
 p.dra {
   font-weight: 100;
-  width: 15em;
+  width: 12em;
 }
 
 section.about {
@@ -185,3 +222,4 @@ section.about {
     }
   }
 }
+

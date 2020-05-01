@@ -3,22 +3,26 @@
 - block main
   .movies__detail
     %section.detail__head
-      %h1= content.name
+      .detail__head__top
+        %p.rank 1
+        %h1= content.name
+        %p.appraise #{ content.appraise } PT
       .detail__head__table
         .detail__head__table__media
           %img(src = "#{ content.img_url }")
-        .detail__head__table__data
-          %p #{ content.appraise } PT
-          %img(src = "/static/ranking/images/graph-sample.jpg")
     %section.detail__body
       .detail__body__info
-        %h2.subtitle Twitterデータ
-        %ul.total
-          %li フォロワー数 : #{ content.twitteruser.followers_count }
-          %li ツイート数 : #{ content.twitteruser.all_tweet_count }
-        %ul.ave
-          %li 平均いいね数 : #{ content.twitteruser.favorite_avg }
-          %li 平均リツイート数 : #{ content.twitteruser.retweets_avg }
+        .detail__body__info__tag
+          %img(src = "#{ content.twitteruser.icon_url }")
+          %h2.subtitle Twitterデータ
+        .detail__body__info__list
+          %ul
+            %li フォロワー数 : #{ content.twitteruser.followers_count }
+            %li ツイート数 : #{ content.twitteruser.all_tweet_count }
+            %li 平均いいね数 : #{ content.twitteruser.favorite_avg }
+            %li 平均リツイート数 : #{ content.twitteruser.retweets_avg }
+        .detail__body__info__graph
+          %img(src = "/static/ranking/images/graph-sample.jpg")
       %hr
       .detail__body__synopsis
         %h2.subtitle あらすじ
