@@ -10,16 +10,19 @@ from django.db import models
 from django.db import transaction
 import environ
 from requests_oauthlib import OAuth1Session
-# from selenium import webdriver
-# from selenium.webdriver.chrome.options import Options
 import urllib3
 
 # Create your models here.
+
+HIGH_RANK_CONTENT = 5
 
 
 class Category(models.Model):
     name = models.CharField('カテゴリー名', max_length=50, unique=True,
                             db_index=True)
+
+    def has_high_rank_content_sort_by_twitter_data(self):
+        return Content.sort_twitter_rating_by(self)[:HIGH_RANK_CONTENT]
 
     def __str__(self):
         return self.name
@@ -65,20 +68,37 @@ class Content(models.Model):
             return 0
 
     @classmethod
-    def sort_twitter_rating_by(cls, category):
+    def sort_twitter_rating_by(cls, category=None):
         """
         カテゴリーに含まれるツイッター評価値順にソートしたコンテンツを返す
-        :return: tuple in list
+        :return list: [{'rank': int(順位), 'content': cls(content), 'points': int(ポイント)}, ..]
         """
-        contents = {
-            content: content.appraise()
-            for content in cls.objects.filter(category=category)}
+        if category:
+            contents = {
+                content: content.appraise()
+                for content in cls.objects.filter(category=category)}
+        else:
+            contents = {
+                content: content.appraise()
+                for content in cls.objects.all()}
         score_sorted = sorted(contents.items(), key=lambda x: x[1],
                               reverse=True)
-        return [content_tuple[0] for content_tuple in score_sorted]
+        ranking, sort_result = 1, []
+        for content_tuple in score_sorted:
+            content_data = {'rank': ranking, 'content': content_tuple[0],
+                            'points': content_tuple[1]}
+            sort_result.append(content_data)
+            ranking += 1
+        return sort_result
+
+    def main_performers(self):
+        return self.staff_set.filter(is_cast=True)[:4]
 
     def performers(self):
         return self.staff_set.filter(is_cast=True)
+
+    def only_staff(self):
+        return self.staff_set.filter(is_cast=False)
 
 
 class Staff(models.Model):
@@ -325,7 +345,10 @@ class TwitterApi(object):
         self.store_timeline_data(timeline, updated_twitter_user)
 
 
-ANIME_TOP_URL = 'https://anime.eiga.com'
+ANIME_TOP_DOMAIN = 'https://anime.eiga.com'
+DRAMA_PART1_DOMAIN = 'https://thetv.jp'
+DRAMA_PART1_PATH = "/program/selection/316/"
+DRAMA_PART2_DOMAIN = "https://drama-circle.com/"
 EXCLUSION_LIST = ['share', 'bs7ch_pr', 'tvtokyo_pr', 'intent', 'search']
 
 
@@ -334,28 +357,179 @@ class ScrapingContent(object):
         self.contents_data = []
         self.contents = []
 
-    def create_url(self, url='', anime_default=False):
+    @staticmethod
+    def create_url(url='', anime_default=False, drama_default1=False):
         if anime_default:
-            url = ANIME_TOP_URL + url
+            url = ANIME_TOP_DOMAIN + url
+        elif drama_default1:
+            url = DRAMA_PART1_DOMAIN + url
         return url
 
-    def get_html_from(self, url):
+    @staticmethod
+    def get_html_from(url):
         http = urllib3.PoolManager()
         response = http.request('GET', url)
         return response
 
-    # def get_html_with_chrome_from(self, url):
-    #     options = Options()
-    #     options.binary_location = '/usr/bin/google-chrome'
-    #     options.add_argument('--headless')
-    #     options.add_argument("--disable-dev-shm-using")
-    #     # options.set_headless(True)
-    #     driver = webdriver.Chrome('chromedriver', options=options)
-    #     # driver = webdriver.Chrome(chrome_options=options)
-    #     driver.get(url)
-    #     return driver.page_source.encode('utf-8')
+    def extra_drama_part1_data_from(self, response):
+        """
+        名前、あらすじ、画像URL、スタッフ情報、キャスト情報を取得するメソッド
+        :return list:
+            [dict, dict, ...., dict]
+        """
+        soup = BeautifulSoup(response.data, 'lxml')
+        url_list = self.extra_drama_part1_url(soup)
+        next_page_path = soup.select_one('ul.pageNav > li.nextPage > a')['href']
+        next_page_url = self.create_url(next_page_path, drama_default1=True)
+        time.sleep(1)
+        next_response = self.get_html_from(next_page_url)
+        next_soup = BeautifulSoup(next_response.data, 'lxml')
+        url_list_of_next_page = self.extra_drama_part1_url(next_soup)
+        url_list.extend(url_list_of_next_page)
+        contents_list = []
+        for detail_url in url_list:
+            time.sleep(1)
+            detail_response = self.get_html_from(detail_url)
+            detail_data = self.extra_drama_part1_detail_data_from(
+                detail_response)
+            contents_list.append(detail_data)
+        return contents_list
 
-    def extra_data_from(self, response):
+    @staticmethod
+    def extra_drama_part1_detail_data_from(response):
+        """
+        :return dict:
+          {name: (text), description: (text), img_url: (text),
+          cast: list[role, name], staff: list[role, name]}
+        """
+        detail_soup = BeautifulSoup(response.data, 'lxml')
+        name = detail_soup.select_one(
+            '#top > div.cp_cont__h > div > div.pp_prg_hdr__grid_1_1 > h1 >'
+            ' span.pp_prg_name__ttl').text.replace('\u3000', '')
+        description = detail_soup.select_one(
+            '#top > div.cp_cont__b > div.pp_prg_data > '
+            'div.pp_prg_data__grid_1_1 > p.pp_prg_plot').text
+        img_url_data = detail_soup.select_one(
+            '#top > div.cp_cont__b > div.pp_prg_data >'
+            ' div.pp_prg_data__grid_1_2 > img')
+        cast_data = detail_soup.find_all('div', class_="cp_cast__txt")
+        cast_list = []
+        pattern = r'役'
+        repatter = re.compile(pattern)
+        for cast_tag in cast_data:
+            cast_name_data = cast_tag.find('span', class_="cp_cast__name")
+            cast_role_data = cast_tag.find('p', class_="cp_cast__char")
+            if cast_name_data and cast_role_data:
+                cast_role = cast_role_data.text
+                if repatter.search(cast_role):
+                    cast_role = cast_role[:-1]
+                cast_list.append('{}:{}'.format(cast_role, cast_name_data.text))
+        staff_data = detail_soup.find_all('li', class_="cp_stf_ls__i")
+        staff_list = []
+        for staff_tag in staff_data:
+            staff_name_data = staff_tag.find('span', class_="cp_stf__n")
+            staff_role_data = staff_tag.find('span', class_="cp_stf__r")
+            if staff_name_data and staff_role_data:
+                staff_list.append('{}:{}'.format(
+                    staff_role_data.text, staff_name_data.text))
+        contents_dict = {'name': name, 'description': description}
+        if img_url_data:
+            contents_dict['img_url'] = img_url_data['src']
+        if cast_list:
+            contents_dict['cast'] = cast_list
+        if staff_list:
+            contents_dict['staff'] = staff_list
+        return contents_dict
+
+    def extra_drama_part1_url(self, soup):
+        url_list = []
+        contents_boxes = soup.select(
+            'div.contentBody.programContent.cn_prg_selections > '
+            'ul.listContent.programList > li.listItem.largeItem')
+        for box in contents_boxes:
+            a_tag = box.find('a')
+            if a_tag:
+                url_path = a_tag['href']
+                url = self.create_url(url_path, drama_default1=True)
+                url_list.append(url)
+        return url_list
+
+    def extra_drama_part2_data_from(self, response):
+        """
+        作品名、公式URL、screen_name、放送開始日を取得するメソッド
+        :return list: ここで取得したcontent情報のリスト
+            [dict, dict, ..., dict]
+        """
+        soup = BeautifulSoup(response.data, 'lxml')
+        drama_boxes = soup.select(
+            '#new-season > #season-drama > .day-dramas > ul')
+        contents_list = []
+        if drama_boxes:
+            for item in drama_boxes:
+                a_tag = item.find('a')
+                if a_tag:
+                    detail_page_url = a_tag['href']
+                    time.sleep(1)
+                    details_page_response = self.get_html_from(detail_page_url)
+                    content_dict = self.extra_drama_detail_part2_data_from(
+                        details_page_response)
+                    contents_list.append(content_dict)
+        return contents_list
+
+    @staticmethod
+    def extra_drama_detail_part2_data_from(response):
+        """
+        :return: dict
+            {name: (text), official_url: (text), screen_name: (text),
+            release_date: (time_date), maker: (text)}
+        """
+        soup = BeautifulSoup(response.data, 'lxml')
+        all_info = soup.find_all('ul', class_='square')
+        basic_info = all_info[0].find_all('li')
+        content_dict = {}
+        pattern = r'https://twitter.com/(\w+)(\?\w+=\w+)?'
+        repatter = re.compile(pattern)
+        for li in basic_info:
+            if 'タイトル：' in li.text:
+                content_dict['name'] = re.split('：', li.text)[1]
+            if 'ドラマ公式URL' in li.text:
+                content_dict['official_url'] = li.find('a')['href']
+            if 'ドラマ公式Twitter' in li.text:
+                screen_name_data = repatter.match(li.find('a')['href'])
+                content_dict['screen_name'] = screen_name_data.groups()[0]
+            if '放映日時' in li.text:
+                date_and_time = re.split(' ', li.text)[1]
+                if '放送開始日' in li.text:
+                    year_and_month = re.split('：', li.text)[1]
+                    release_time_date = year_and_month + " " + date_and_time
+                    native_date = datetime.strptime(release_time_date,
+                                                    '%Y年%m月%d日 %H:%M')
+                    content_dict['release_date'] = timezone(
+                        'Asia/Tokyo').localize(native_date)
+        maker_info = all_info[-1]
+        maker_text = maker_info.find_all('li')[-1].text
+        content_dict['maker'] = re.split('：', maker_text)[1]
+        return content_dict
+
+    def combine(self, contents_list1, contents_list2):
+        combined_list = []
+        for part2 in contents_list2:
+            for part1 in contents_list1:
+                if part1['name'].startswith(part2['name']):
+                    part1.update(part2)
+                    combined_list.append(part1)
+        return combined_list
+
+    def extra_anime_data_from(self, response):
+        """
+        :return self.contents_data (list):
+            [dict, dict, ... dict]
+
+            ＊dictの内容
+            {name: (text), maker: (text), description: (text),
+            cast: list[(text)], official_url: (text), staff: list[(text)],
+            img_url: (text), screen_name: (text)}
+        """
         soup = BeautifulSoup(response.data, 'lxml')
         anime_boxes = soup.find_all('div', {'class': 'animeSeasonBox'})
         if anime_boxes:
@@ -397,6 +571,11 @@ class ScrapingContent(object):
         return self.contents_data
 
     def get_screen_name_from(self, url):
+        """
+        引数のURLのサイトからtwitterのIDを抜き取り返す
+        :param url:
+        :return　str: screen_name
+        """
         response = self.get_html_from(url)
         soup = BeautifulSoup(response.data, 'lxml')
         pattern = r'https://twitter.com/(\w+)(\?\w+=\w+)?'
@@ -417,10 +596,12 @@ class ScrapingContent(object):
 
     # TODO (3) 取得できなかった情報について、release_dateについて
     @transaction.atomic
-    def store_contents_data(self, category):
+    def store_contents_data(self, category, anime=False, drama=False):
         """
         引数のデータをcontentモデル・staffモデルとして保存する。
         :param category: obj
+        :param anime: Boolean
+        :param drama: Boolean
         """
         if self.contents_data:
             for content_data in self.contents_data:
@@ -432,28 +613,56 @@ class ScrapingContent(object):
                         content_args[attr_key] = attr_value
                 new_content = Content.objects.create(**content_args)
                 self.contents.append(new_content)
+                if anime:
+                    self.store_anime_staff(content_data, new_content)
+                if drama:
+                    self.store_drama_staff(content_data, new_content)
 
-                if 'staff' in content_data:
-                    role_and_name = [re.split('[【】、]', person)
-                                     for person in content_data['staff']]
-                    for item in role_and_name:
-                        staff_args = {'name': item[2], 'role': item[1],
-                                      'content': new_content}
-                        Staff.objects.create(**staff_args)
-                        limit = len(item) - 3
-                        for num in range(limit):
-                            staff_args = {'role': item[1],
-                                          'name': item[num + 3],
-                                          'content': new_content}
-                            Staff.objects.create(**staff_args)
-                if 'cast' in content_data:
-                    role_and_name = [
-                        person.split('：') for person in content_data['cast']]
-                    for person in role_and_name:
-                        staff_args = {'role': person[0], 'name': person[1],
-                                      'content': new_content, 'is_cast': True}
-                        Staff.objects.create(**staff_args)
+    @staticmethod
+    def store_anime_staff(content_dict, content):
+        """
+        :param content_dict: 取得したコンテンツのdict
+        :param content: スタッフ情報を保存するコンテンツ
+        """
+        if 'staff' in content_dict:
+            role_and_name = [re.split('[【】、]', person)
+                             for person in content_dict['staff']]
+            for item in role_and_name:
+                staff_args = {'name': item[2], 'role': item[1],
+                              'content': content}
+                Staff.objects.create(**staff_args)
+                limit = len(item) - 3
+                for num in range(limit):
+                    staff_args = {'role': item[1],
+                                  'name': item[num + 3],
+                                  'content': content}
+                    Staff.objects.create(**staff_args)
+        if 'cast' in content_dict:
+            role_and_name = [
+                person.split('：') for person in content_dict['cast']]
+            for person in role_and_name:
+                staff_args = {'role': person[0], 'name': person[1],
+                              'content': content, 'is_cast': True}
+                Staff.objects.create(**staff_args)
 
+    @staticmethod
+    def store_drama_staff(content_dict, content):
+        if 'staff' in content_dict:
+            role_and_name = [re.split(':', person)
+                             for person in content_dict['staff']]
+            for person in role_and_name:
+                staff_args = {'name': person[1], 'role': person[0],
+                              'content': content}
+                Staff.objects.create(**staff_args)
+        if 'cast' in content_dict:
+            role_and_name = [
+                person.split(':') for person in content_dict['cast']]
+            for person in role_and_name:
+                staff_args = {'name': person[1], 'role': person[0],
+                              'content': content, 'is_cast': True}
+                Staff.objects.create(**staff_args)
+
+    @transaction.atomic
     def get_anime_data(self):
         """
         アニメに関する情報を取得しモデルを新規作成する
@@ -461,7 +670,24 @@ class ScrapingContent(object):
         """
         url = self.create_url('/program', anime_default=True)
         response = self.get_html_from(url)
-        self.extra_data_from(response)
+        self.extra_anime_data_from(response)
         anime_category = Category.objects.get(name='アニメ')
-        self.store_contents_data(anime_category)
+        self.store_contents_data(anime_category, anime=True)
+        return self
+
+    @transaction.atomic
+    def get_drama_data(self):
+        """
+        ドラマに関する情報を取得しモデルを作成する
+        :return:
+        """
+        url = self.create_url(DRAMA_PART1_PATH, drama_default1=True)
+        response_part1 = self.get_html_from(url)
+        part1_contents_list = self.extra_drama_part1_data_from(response_part1)
+        response_part2 = self.get_html_from(DRAMA_PART2_DOMAIN)
+        part2_contents_list = self.extra_drama_part2_data_from(response_part2)
+        self.contents_data = self.combine(
+            part1_contents_list, part2_contents_list)
+        drama_category = Category.objects.get(name='ドラマ')
+        self.store_contents_data(drama_category, drama=True)
         return self

@@ -1,11 +1,19 @@
-from ranking.models import *
+# from ranking.models import *
+# scrp = ScrapingContent()
+# url = scrp.create_url(DRAMA_PART1_PATH, drama_default1=True)
+# response_part1 = scrp.get_html_from(url)
+# part1_contents_list = scrp.extra_drama_part1_data_from(response_part1)
+# response_part2 = scrp.get_html_from(DRAMA_PART2_DOMAIN)
+# part2_contents_list = scrp.extra_drama_part2_data_from(response_part2)
 
 
 def main():
-    content_getter = ScrapingContent()
-    url = content_getter.create_url('/program', anime_default=True)
-    response = content_getter.get_html_from(url)
-    contents_data = content_getter.extra_data_from(response)
+    scrp = ScrapingContent()
+    url = scrp.create_url(DRAMA_PART1_PATH, drama_default1=True)
+    response_part1 = scrp.get_html_from(url)
+    part1_contents_list = scrp.extra_drama_part1_data_from(response_part1)
+    response_part2 = scrp.get_html_from(DRAMA_PART2_DOMAIN)
+    part2_contents_list = scrp.extra_drama_part2_data_from(response_part2)
 
 
 

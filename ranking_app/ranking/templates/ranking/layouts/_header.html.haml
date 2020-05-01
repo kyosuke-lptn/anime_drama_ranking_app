@@ -6,7 +6,7 @@
     %ul
       %li
         %a{href: "{% url 'ranking:index' %}"} トップ
-      %li
-        %a{href: "{% url 'ranking:category' 1 %}"} アニメ
-      %li
-        %a{href: '/dramas'} ドラマ
+      - for category in categories
+        %li
+          %a{href: "{% url 'ranking:category' category.id %}"}
+            =category.name
