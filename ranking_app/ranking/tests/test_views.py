@@ -108,4 +108,3 @@ class ContentDetailViewTests(TestCase):
         self.assertContains(response, cast.role)
         self.assertContains(response, staff.name)
         self.assertContains(response, staff.role)
-

@@ -48,6 +48,18 @@ DATABASES = {
     }
 }
 
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'ranking.middleware.InitCreateCategoryMiddleware',
+]
+
 # TODO (sumitani) 本番環境でのLOG設定を追加する
 
 # TODO (sumitani) staticファイルを配信する時に本番環境では、プロキシサーバなどに配置するように設定する

@@ -37,6 +37,13 @@ class ContentDetailView(View):
         return render(request, 'ranking/content_detail.html.haml', context)
 
 
+def error_404(request, exception):
+    contexts = {
+        'request_path': request.path,
+    }
+    return render(request, 'ranking/404.html.haml', contexts, status=404)
+
+
 index = IndexView.as_view()
 category_index = CategoryIndexView.as_view()
 content_detail = ContentDetailView.as_view()

@@ -20,3 +20,5 @@ urlpatterns = [
     path('', include('ranking.urls')),
     path('admin/', admin.site.urls),
 ]
+
+handler404 = 'ranking.views.error_404'
