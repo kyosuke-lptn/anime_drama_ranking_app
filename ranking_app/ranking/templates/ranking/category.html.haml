@@ -21,7 +21,10 @@
               %h3 &nbsp;&nbsp;#{ info.content.name }
             .category__box__media
               .category__box__media__image
-                %img(src = "#{ info.content.img_url }")
+                - if info.content.img_url
+                  %img(src = "#{ info.content.img_url }")
+                - else
+                  %img(src = '/static/ranking/images/noimage.jpg')
               .category__box__media__info
                 .category__box__media__info__point
                   %p #{info.points} PT
