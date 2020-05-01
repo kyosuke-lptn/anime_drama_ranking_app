@@ -63,7 +63,7 @@ class CategoryViewTests(TestCase):
             start = stop - 15
             for ranking_content in contents[start:stop]:
                 self.assertContains(response, ranking_content.name)
-                self.assertContains(response, ranking_content.img_url)
+                self.assertNotContains(response, ranking_content.img_url)
                 for cast in ranking_content.performers():
                     self.assertContains(response, cast.name)
                     self.assertContains(response, cast.role)
@@ -93,7 +93,7 @@ class ContentDetailViewTests(TestCase):
             reverse('ranking:content_detail', args=[content.id]))
 
         self.assertContains(response, content.name)
-        self.assertContains(response, content.img_url)
+        self.assertNotContains(response, content.img_url)
         self.assertContains(response, content.screen_name)
         self.assertContains(response, content.description)
         self.assertContains(response, content.maker)
