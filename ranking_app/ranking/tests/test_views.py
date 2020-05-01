@@ -41,6 +41,7 @@ class RankingIndexViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         for content in contents:
             self.assertContains(response, content.name)
+            self.assertContains(response, content.appraise())
         self.assertNotContains(response, "Not popular")
 
 
@@ -68,6 +69,16 @@ class CategoryViewTests(TestCase):
                     self.assertContains(response, cast.role)
             self.assertNotContains(response, contents[stop])
             self.assertContains(response, '美しい世界は')
+
+    def test_paging(self):
+        anime = CategoryFactory(name='アニメ')
+        for _ in range(30):
+            create_content_with_data(anime)
+
+        response = self.client.get(reverse('ranking:category', args=[anime.id]))
+
+        self.assertContains(response, 'p=1')
+        self.assertContains(response, 'p=2')
 
 
 class ContentDetailViewTests(TestCase):
