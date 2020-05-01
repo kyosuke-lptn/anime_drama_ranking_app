@@ -14,21 +14,31 @@
     }
   }
   .detail__head__table {
-    padding: 20px 0 10px 0;
+    padding: 20px 15px 10px 15px;
     height: 100%;
     width: 100%;
     display: inline-block;
+    vertical-align: bottom;
     &__media {
       float: left;
+      height: 100%;
+      width: 35%;
+      img {
+        height: 300px;
+        width: auto;
+      }
     }
-    &__graph {
+    &__data {
       float: right;
-    }
-    img {
-      height: 300px;
-      width: auto;
-      padding: 0 15px 0 15px ;
-      text-align: center;
+      height: 100%;
+      width: 65%;
+      img {
+        height: 260px;
+        width: auto;
+      }
+      p {
+        font-size: 30px;
+      }
     }
   }
   .detail__body {

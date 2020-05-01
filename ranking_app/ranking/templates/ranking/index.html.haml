@@ -13,14 +13,15 @@
               %a.topic1{href: "{% url 'ranking:category' category.id %}"}
                 = category.name
               - for content in category.has_high_rank_content_sort_by_twitter_data
-                .container__info__box #{ forloop.counter }位
+                .container__info__box
+                  %p.rank #{ forloop.counter }
+                  %p.appraise [#{content.appraise} PT]
                   %br
                   %a{href: "{% url 'ranking:content_detail' content.id %}"}
                     %img(src = "#{ content.img_url }")
                   %br
                   %a.ani{href: "{% url 'ranking:content_detail' content.id %}"}
                     %p= content.name
-                    %p= content.appraise
         - elif category.name == 'ドラマ'
           %section.dra
             %p.container__info__dra
@@ -28,6 +29,7 @@
                 = category.name
               - for content in category.has_high_rank_content_sort_by_twitter_data
                 .container__info__box #{ forloop.counter }位
+                  %p.dra= content.appraise
                   %br
                   %a{href: "{% url 'ranking:content_detail' content.id %}"}
                     %img(src = "#{ content.img_url }")
@@ -39,9 +41,16 @@
         %p.container__info__about このサイトについて
           %dd アニメ及びドラマの公式ツイッターから取得した情報を総合的に評価し、ランキング形式で紹介しています。
             %br 
-            取得データは下記となります。
+            ランキングに掲載されているポイントは、
+            %br
+            %br
+            {（ 平均いいね数×１ ＋ 平均リツイート数×２ ）／ １００ }
+            %br
+            %br
+            以上の計算式をもとに算出しています。
+            %br
+            なお、全取得データは下記となります。
             %ul
-              %li フォロー数
               %li フォロワー数
               %li ツイート数
               %li 平均いいね数
@@ -49,5 +58,5 @@
               %li 平均リツイート数
               %li アイコン及びバナーの画像
               %li ツイート内容
-          %dd 各作品の詳細ページにて、当該作品の基本情報と併せて、所得した情報をもとにグラフを作成し、掲載しております。
+          %dd 各作品の詳細ページにて、当該作品の基本情報と併せて、所得した情報をもとにグラフを作成し、掲載しています。
         
