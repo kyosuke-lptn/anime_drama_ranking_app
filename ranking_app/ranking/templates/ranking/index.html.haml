@@ -12,7 +12,7 @@
           - for content in anime
             .container__info__box 
               %p.rank #{ forloop.counter }
-              %p.appraise [#{content.appraise}PT]
+              %p.appraise [#{content.appraise} PT]
               %br
               %a{href: '/detail'}
                 %img(src = "#{ content.img_url }")
