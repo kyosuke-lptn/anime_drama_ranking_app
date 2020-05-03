@@ -25,10 +25,13 @@
           %ul
             %li フォロワー数 : #{ content.twitteruser.followers_count }
             %li ツイート数 : #{ content.twitteruser.all_tweet_count }
-            %li 平均いいね数 : #{ content.twitteruser.favorite_avg }
-            %li 平均リツイート数 : #{ content.twitteruser.retweets_avg }
+            %li 平均いいね数 : #{ content.twitteruser.favorite_avg }&nbsp;P
+            %li 平均リツイート数 : #{ content.twitteruser.retweets_avg }&nbsp;P
+            %a{href: "https://twitter.com/#{ content.screen_name }/status/#{ content.twitteruser.popular_tweet.1.tweet_id }"}
+                %li 一番人気のツイート(#{ content.twitteruser.popular_tweet.0 }&nbsp;P)
         .detail__body__info__graph
-          %img(src = "/static/ranking/images/noimage.jpg'")
+          %p.graph ポイント推移
+          %img(src = "{% url 'ranking:content_rank_graph' content.id %}")
       %hr
       .detail__body__synopsis
         %h2.subtitle あらすじ
