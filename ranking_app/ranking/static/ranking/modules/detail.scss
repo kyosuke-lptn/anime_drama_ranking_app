@@ -84,6 +84,13 @@
         li {
           margin-top: 5px;
         }
+        a:link, a:visited, a:active {
+          text-decoration: none;
+          color: #FFFFF0;
+        }
+        a:hover {
+          text-decoration: underline;
+        }
       }
       &__graph {
         height: 100%;
@@ -91,11 +98,11 @@
         display: inline-block;
         text-align: center;
         img {
-          height: 260px;
+          height: 333px;
           width: auto;
         }
         p {
-          font-size: 30px;
+          font-size: 20px;
         }
       }
     }

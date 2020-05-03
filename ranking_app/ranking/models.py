@@ -4,11 +4,14 @@ import json
 import re
 import time
 from pytz import timezone
+import io
 
 from bs4 import BeautifulSoup
 from django.db import models
 from django.db import transaction
 import environ
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from requests_oauthlib import OAuth1Session
 import urllib3
 
@@ -166,6 +169,13 @@ class TwitterUser(models.Model):
     def latest_tweet(self):
         return self.tweet_set.order_by('-tweet_date')[0]
 
+    def popular_tweet(self):
+        tweets = {tweet.latest_tweet_count().appraise(): tweet for tweet in
+                  self.tweet_set.all().prefetch_related('tweetcount_set')}
+        return sorted(tweets.items(), reverse=True)[0]
+
+    # def display_popular_tweet(self):
+
 
 class Tweet(models.Model):
     tweet_id = models.CharField('ツイートID', unique=True, max_length=100)
@@ -190,6 +200,18 @@ class TweetCount(models.Model):
     retweet_count = models.PositiveIntegerField('リツート数')
     favorite_count = models.PositiveIntegerField('いいね数')
     create_date = models.DateTimeField('ツイート取得日', auto_now_add=True)
+
+    def appraise(self):
+        """
+        （いいねx1 ＋ リツイートx2）/100の計算式でランキングのための数値を算出しています。
+        これは、いいねよりリツイートの方が数が比較的少なく、リツイートの方が価値が高いと考えたためです。
+        :return:
+        """
+        if self.retweet_count or self.favorite_count:
+            result = (self.favorite_count + self.retweet_count * 2) / 100
+            return round(result, 2)
+        else:
+            return 0
 
 
 TIMELINE_COUNT = '200'
@@ -700,3 +722,37 @@ class ScrapingContent(object):
         drama_category = Category.objects.get(name='ドラマ')
         self.store_contents_data(drama_category, drama=True)
         return self
+
+
+class Graph(object):
+
+    def __init__(self):
+        self.ax = None
+        self.svg = None
+
+    def set_rank_graph(self, content):
+        start = TwitterApi.start_datetime()
+        tweet_list = content.twitteruser.tweet_set.filter(
+            tweet_date__gte=start).order_by('-tweet_date')
+        x, y = [], []
+        for tweet in tweet_list:
+            x.append(tweet.latest_tweet_count().appraise())
+            y.append(tweet.tweet_date)
+        ja_tz = timezone('Asia/Tokyo')
+        self.ax = plt.subplot()
+        self.ax.plot(y, x)
+        date_format = mdates.DateFormatter("%m/%d")
+        date_interval = mdates.DayLocator(interval=5, tz=ja_tz)
+        self.ax.xaxis.set_major_locator(date_interval)
+        self.ax.xaxis.set_major_formatter(date_format)
+        self.ax.set_xlim(start, datetime.now(ja_tz))
+
+    def plt_to_svg(self):
+        buf = io.BytesIO()
+        plt.savefig(buf, format='svg', bbox_inches='tight')
+        self.svg = buf.getvalue()
+        buf.close()
+        return self.svg
+
+    def plt_clean(self):
+        plt.cla()

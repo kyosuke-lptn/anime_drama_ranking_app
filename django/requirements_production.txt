@@ -3,6 +3,7 @@ beautifulsoup4==4.9.0
 bs4==0.0.1
 certifi==2020.4.5.1
 chardet==3.0.4
+cycler==0.10.0
 Django==3.0.5
 django-appconf==1.0.4
 django-compressor==2.4
@@ -10,10 +11,14 @@ django-environ==0.4.5
 django-hamlpy==1.2
 django-sass-processor==0.8
 idna==2.9
+kiwisolver==1.2.0
 libsass==0.19.4
 lxml==4.5.0
+matplotlib==3.2.1
 mysqlclient==1.4.6
+numpy==1.18.3
 oauthlib==3.1.0
+pyparsing==2.4.7
 pytz==2019.3
 rcssmin==1.0.6
 regex==2020.4.4

@@ -1,9 +1,11 @@
 from django.shortcuts import render
+from django.http import HttpResponse
 from django.views import View
 from django.views.generic import TemplateView
 
 from .models import Category
 from .models import Content
+from .models import Graph
 from .utils import paging
 
 # Create your views here.
@@ -35,6 +37,15 @@ class ContentDetailView(View):
             'content': content,
         }
         return render(request, 'ranking/content_detail.html.haml', context)
+
+
+def get_svg(request, content_id):
+    content = Content.objects.get(pk=content_id)
+    graph = Graph()
+    graph.set_rank_graph(content)
+    svg = graph.plt_to_svg()
+    graph.plt_clean()
+    return HttpResponse(svg, content_type='image/svg+xml')
 
 
 def error_404(request, exception):
