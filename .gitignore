@@ -6,9 +6,6 @@ ranking_app/static/ranking/*
 # mysql env
 mysql/.env_sample
 
-# 環境変数
-.env
-
 # pychrm setteing file
 .idea/
 
