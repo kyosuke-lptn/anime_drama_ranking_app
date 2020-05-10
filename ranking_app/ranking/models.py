@@ -170,8 +170,9 @@ class TwitterUser(models.Model):
         return self.tweet_set.order_by('-tweet_date')[0]
 
     def popular_tweet(self):
+        start_datetime = TwitterApi.start_datetime()
         tweets = {tweet.latest_tweet_count().appraise(): tweet for tweet in
-                  self.tweet_set.all().prefetch_related('tweetcount_set')}
+                  self.tweet_set.filter(tweet_date__gte=start_datetime).prefetch_related('tweetcount_set')}
         return sorted(tweets.items(), reverse=True)[0]
 
     # def display_popular_tweet(self):
