@@ -40,4 +40,6 @@ ACCESS_TOKEN=${ACCESS_TOKEN}
 SECRET_TOKEN=${SECRET_TOKEN}
 EOS
 
+python3 manage.py compilescss
+python3 manage.py collectstatic
 uwsgi --ini /usr/src/django/ranking_app/ranking_uwsgi.ini
