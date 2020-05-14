@@ -66,6 +66,38 @@ STATICFILES_FINDERS = [
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-# TODO (sumitani) 本番環境でのLOG設定を追加する
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'production': {
+            'format': '%(asctime)s [%(levelname)s] %(process)d %(thread)d '
+                      '%(pathname)s:%(lineno)d %(message)s'
+        },
+    },
+    'handlers': {
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'logs/django.log',  #環境に合わせて変更
+            'formatter': 'production',
+            'level': 'INFO',
+        },
+    },
+    'loggers': {
+        # 自作したログ出力
+        '': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # Djangoの警告・エラー
+        'django': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
 
 # TODO (sumitani) staticファイルを配信する時に本番環境では、プロキシサーバなどに配置するように設定する
